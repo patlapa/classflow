@@ -1,0 +1,3388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ClassFlow — The teacher's digital notebook</title>
+<style>
+  :root{
+    --bg: #f6f8fb;
+    --surface: #ffffff;
+    --surface-2: #fbfcfe;
+    --border: #e6ebf2;
+    --border-strong: #d6dde7;
+    --text: #1a2230;
+    --text-muted: #5a6577;
+    --text-subtle: #8a93a3;
+    --primary: #3b6df2;
+    --primary-soft: #eaf0ff;
+    --primary-dark: #2a55cf;
+    --accent: #5b8def;
+    --success: #1f9d6e;
+    --success-soft: #e3f5ec;
+    --warning: #c98a1a;
+    --warning-soft: #fbf2dc;
+    --danger: #c44a4a;
+    --danger-soft: #fbe7e7;
+    --neutral-soft: #eef1f6;
+    --shadow-sm: 0 1px 2px rgba(20,30,50,0.04), 0 1px 3px rgba(20,30,50,0.04);
+    --shadow-md: 0 2px 6px rgba(20,30,50,0.05), 0 6px 18px rgba(20,30,50,0.06);
+    --shadow-lg: 0 8px 28px rgba(20,30,50,0.10);
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-lg: 16px;
+  }
+
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; padding:0; }
+  body{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- App layout ---------- */
+  .app{
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .brand{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 8px 22px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .brand-mark{
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #3b6df2, #6b9bff);
+    display:flex; align-items:center; justify-content:center;
+    color: white; font-weight: 700; font-size: 15px;
+    box-shadow: var(--shadow-sm);
+  }
+  .brand-name{
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.2px;
+  }
+  .nav{ display: flex; flex-direction: column; gap: 2px; }
+  .nav-item{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover{ background: var(--neutral-soft); color: var(--text); }
+  .nav-item.active{
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+  }
+  .nav-item .ico{
+    width: 18px; height: 18px;
+    display:inline-flex; align-items:center; justify-content:center;
+    color: currentColor;
+  }
+  .sidebar-footer{
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar{
+    width: 34px; height: 34px;
+    background: #d8e1f3;
+    color: #2a55cf;
+    border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight: 700; font-size: 13px;
+  }
+  .user-name{ font-weight: 600; font-size: 13px; }
+  .user-role{ font-size: 12px; color: var(--text-subtle); }
+
+  /* ---------- Main content ---------- */
+  .main{
+    padding: 28px 36px 60px;
+    max-width: 1280px;
+    width: 100%;
+  }
+  .topbar{
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-title{
+    font-size: 22px; font-weight: 700; letter-spacing: -0.3px;
+    margin: 0 0 4px;
+  }
+  .page-subtitle{
+    color: var(--text-muted);
+    font-size: 13.5px;
+    margin: 0;
+  }
+  .topbar-actions{ display:flex; gap:10px; align-items:center; }
+
+  .btn{
+    appearance:none; border:none; cursor:pointer;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-weight: 600; font-size: 13.5px;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: background 0.15s, box-shadow 0.15s, transform 0.05s;
+    font-family: inherit;
+  }
+  .btn-primary{
+    background: var(--primary); color: #fff;
+    box-shadow: 0 1px 2px rgba(59,109,242,0.25);
+  }
+  .btn-primary:hover{ background: var(--primary-dark); }
+  .btn-secondary{
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-secondary:hover{ background: var(--neutral-soft); }
+  .btn-ghost{
+    background: transparent; color: var(--text-muted);
+  }
+  .btn-ghost:hover{ background: var(--neutral-soft); color: var(--text); }
+  .btn-danger-ghost{
+    background: transparent; color: var(--danger);
+  }
+  .btn-danger-ghost:hover{ background: var(--danger-soft); }
+  .btn-sm{ padding: 6px 10px; font-size: 12.5px; border-radius: 8px; }
+
+  /* ---------- Cards ---------- */
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .card-pad{ padding: 20px 22px; }
+
+  /* ---------- Screen visibility ---------- */
+  .screen{ display: none; animation: fade .18s ease-out; }
+  .screen.active{ display: block; }
+  @keyframes fade { from{ opacity:0; transform: translateY(2px);} to{ opacity:1; transform:none;} }
+
+  /* ============================================================
+     SCREEN 1 — Weekly Schedule
+     ============================================================ */
+  .week-toolbar{
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .week-nav{
+    display:flex; align-items:center; gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .week-nav button{
+    background: transparent; border:none; cursor:pointer;
+    padding: 6px 10px; border-radius: 7px;
+    color: var(--text-muted);
+    font-family: inherit; font-size: 13px; font-weight: 600;
+  }
+  .week-nav button:hover{ background: var(--neutral-soft); color: var(--text); }
+  .week-label{
+    padding: 0 10px; font-weight: 600; color: var(--text);
+  }
+
+  .week-grid{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+  .day-col{
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    min-height: 480px;
+  }
+  .day-head{
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border-strong);
+  }
+  .day-name{ font-weight: 700; font-size: 14px; color: var(--text); }
+  .day-date{ font-size: 12px; color: var(--text-subtle); }
+
+  .lesson-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 13px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.08s, box-shadow 0.15s, border-color 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .lesson-card:hover{
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .lesson-card .accent{
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--primary);
+  }
+  .lesson-card.meeting .accent{ background: #b58df2; }
+  .lesson-card.completed .accent{ background: #b8c0cd; }
+  .lesson-card.now .accent{ background: var(--success); }
+
+  .lesson-time{
+    font-size: 12px; color: var(--text-muted); font-weight: 600;
+    margin-bottom: 4px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .lesson-title{
+    font-weight: 700; font-size: 14px;
+    margin-bottom: 2px;
+    color: var(--text);
+  }
+  .lesson-meta{
+    font-size: 12px; color: var(--text-subtle);
+  }
+  .badge{
+    display: inline-flex; align-items: center;
+    font-size: 10.5px; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .badge.now{ background: var(--success-soft); color: var(--success); }
+  .badge.upcoming{ background: var(--primary-soft); color: var(--primary-dark); }
+  .badge.completed{ background: var(--neutral-soft); color: var(--text-muted); }
+  .badge.meeting{ background: #f0e7fb; color: #6c3fb5; }
+
+  /* ============================================================
+     SCREEN 2 — Lesson Capture
+     ============================================================ */
+  .lesson-header{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 18px;
+  }
+  .lesson-header .left h2{
+    margin: 0 0 4px; font-size: 20px; font-weight: 700;
+  }
+  .lesson-header .meta{
+    color: var(--text-muted); font-size: 13.5px;
+  }
+  .back-link{
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-bottom: 8px;
+  }
+  .back-link:hover{ color: var(--text); }
+
+  .lesson-grid{
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 18px;
+  }
+  .student-list{
+    padding: 16px;
+    height: fit-content;
+  }
+  .student-list h3{
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-subtle);
+  }
+  .student-search{
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 10px;
+    font-family: inherit;
+  }
+  .student-search:focus{ outline: 2px solid var(--primary-soft); border-color: var(--primary); }
+
+  .student-item{
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.12s;
+    font-size: 13.5px;
+  }
+  .student-item:hover{ background: var(--primary-soft); color: var(--primary-dark); }
+  .student-avatar{
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+    display:flex; align-items:center; justify-content:center;
+    font-weight: 600; font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .notebook{
+    padding: 18px 20px;
+    position: relative;
+  }
+  .notebook-label{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .observation-box{
+    width: 100%;
+    min-height: 220px;
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.65;
+    resize: vertical;
+    color: var(--text);
+    background: var(--surface-2);
+  }
+  .observation-box:focus{
+    outline: 2px solid var(--primary-soft);
+    border-color: var(--primary);
+    background: #fff;
+  }
+  .suggestion-box{
+    margin-top: 10px;
+    padding: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: none;
+  }
+  .suggestion-box.show{ display: block; }
+  .suggestion-box .label{
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    letter-spacing: 0.5px;
+    padding: 4px 8px 6px;
+    font-weight: 700;
+  }
+  .suggestion-item{
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13.5px;
+  }
+  .suggestion-item:hover, .suggestion-item.active{
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+  }
+  .notebook-actions{
+    margin-top: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .helper-text{
+    color: var(--text-subtle);
+    font-size: 12.5px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ============================================================
+     SCREEN 3 — AI Review
+     ============================================================ */
+  .review-banner{
+    background: var(--primary-soft);
+    border: 1px solid #d3deff;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+    color: var(--primary-dark);
+    font-size: 13.5px;
+  }
+  .review-banner .ico{
+    width: 28px; height: 28px;
+    background: #fff;
+    border-radius: 8px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink: 0;
+    color: var(--primary);
+  }
+
+  .review-list{ display: flex; flex-direction: column; gap: 12px; }
+  .review-row{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    gap: 16px;
+    align-items: start;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .review-row.approved{
+    border-color: #b9e0cd;
+    background: linear-gradient(0deg, rgba(31,157,110,0.02), rgba(31,157,110,0.02)), var(--surface);
+  }
+  .review-check{
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border-strong);
+    background: #fff;
+    cursor: pointer;
+    display:flex; align-items:center; justify-content:center;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .review-check.checked{
+    background: var(--success);
+    border-color: var(--success);
+    color: #fff;
+  }
+  .review-content{ min-width: 0; }
+  .review-student{
+    font-weight: 700; font-size: 15px;
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .review-observation{
+    font-size: 13.5px;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.55;
+  }
+  .review-observation[contenteditable="true"]{
+    outline: 2px solid var(--primary-soft);
+    border-radius: 6px;
+    padding: 4px 6px;
+    background: #fff;
+  }
+  .review-tags{
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    font-size: 12px; color: var(--text-muted);
+  }
+  .tag{
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 11.5px;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .tag.cat-late{ background: #fdecec; color: #b53737; }
+  .tag.cat-missing{ background: #fbf2dc; color: #8a6210; }
+  .tag.cat-disrupt{ background: #fde7d8; color: #ab5314; }
+  .tag.cat-positive{ background: var(--success-soft); color: var(--success); }
+  .tag.cat-followup{ background: #ecebfb; color: #5b53b8; }
+  .tag.cat-neutral{ background: var(--neutral-soft); color: var(--text-muted); }
+
+  .review-actions{ display: flex; gap: 4px; }
+  .icon-btn{
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: none; background: transparent;
+    cursor: pointer;
+    color: var(--text-muted);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:hover{ background: var(--neutral-soft); color: var(--text); }
+  .icon-btn.danger:hover{ background: var(--danger-soft); color: var(--danger); }
+
+  .review-footer{
+    margin-top: 22px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .review-summary{
+    font-size: 13px; color: var(--text-muted);
+  }
+
+  /* ============================================================
+     SCREEN 4 — Student History
+     ============================================================ */
+  .history-grid{
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 18px;
+  }
+  .student-roster{ padding: 16px; height: fit-content; }
+  .roster-item{
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .roster-item:hover{ background: var(--neutral-soft); }
+  .roster-item.active{ background: var(--primary-soft); color: var(--primary-dark); }
+  .roster-name{ font-weight: 600; font-size: 13.5px; }
+  .roster-meta{ font-size: 12px; color: var(--text-subtle); }
+
+  .student-profile{ padding: 22px 24px; }
+  .profile-head{
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .profile-avatar{
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, #d8e1f3, #c3d3f5);
+    color: var(--primary-dark);
+    border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight: 700; font-size: 18px;
+    flex-shrink: 0;
+  }
+  .profile-name{ font-size: 19px; font-weight: 700; margin: 0; }
+  .profile-class{ color: var(--text-muted); font-size: 13.5px; margin-top: 2px; }
+
+  .filter-chips{
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .chip{
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    cursor: pointer;
+    font-size: 12.5px; font-weight: 600;
+    color: var(--text-muted);
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .chip:hover{ background: var(--neutral-soft); }
+  .chip.active{ background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  .timeline{ display: flex; flex-direction: column; gap: 10px; }
+  .timeline-item{
+    display: grid;
+    grid-template-columns: 86px 1fr auto;
+    gap: 14px;
+    align-items: start;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .timeline-date{
+    font-weight: 700; font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .timeline-text{
+    font-size: 13.5px; color: var(--text);
+    line-height: 1.5;
+  }
+  .timeline-context{
+    font-size: 12px; color: var(--text-subtle);
+    margin-top: 4px;
+  }
+
+  /* ============================================================
+     SCREEN 5 — Search
+     ============================================================ */
+  .search-hero{
+    padding: 28px 28px 22px;
+    background: linear-gradient(180deg, #fff, #f9fbff);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 18px;
+  }
+  .search-hero h2{
+    margin: 0 0 6px; font-size: 18px; font-weight: 700;
+  }
+  .search-hero p{
+    margin: 0 0 16px; color: var(--text-muted); font-size: 13.5px;
+  }
+  .search-bar{
+    display: flex; align-items: center; gap: 10px;
+    background: #fff;
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 6px 6px 6px 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .search-bar input{
+    flex: 1;
+    border: none; outline: none;
+    font-size: 14.5px;
+    padding: 10px 4px;
+    font-family: inherit;
+    background: transparent;
+  }
+
+  .suggested-questions{
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .suggested-q{
+    padding: 7px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12.5px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .suggested-q:hover{ background: var(--primary-soft); color: var(--primary-dark); border-color: #cad9ff; }
+
+  .answer-card{
+    padding: 22px 24px;
+    margin-top: 4px;
+    display: none;
+  }
+  .answer-card.show{ display: block; }
+  .answer-head{
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .answer-head .ico{
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .answer-question{
+    font-weight: 700; font-size: 15px; color: var(--text);
+  }
+  .answer-summary{
+    font-size: 14px; color: var(--text); margin-bottom: 14px;
+    line-height: 1.6;
+  }
+  .answer-list{
+    display: flex; flex-direction: column; gap: 8px;
+    margin-bottom: 16px;
+  }
+  .answer-list .timeline-item{ background: #fff; }
+
+  .pattern-card{
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .pattern-card h4{
+    margin: 0 0 10px;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-subtle);
+    font-weight: 700;
+  }
+  .pattern-row{
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0;
+    font-size: 13.5px;
+  }
+  .pattern-row + .pattern-row{ border-top: 1px dashed var(--border); }
+  .pattern-count{
+    font-weight: 700; color: var(--text);
+  }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1a2230;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13.5px; font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    z-index: 1000;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.show{
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+
+  /* ---------- Empty state ---------- */
+  .empty{
+    text-align: center;
+    color: var(--text-subtle);
+    padding: 40px 20px;
+    font-size: 13.5px;
+  }
+
+  /* SVG icons inline sizing */
+  svg{ display: block; }
+
+  /* ---------- AI feature components ---------- */
+
+  /* Briefing & coverage hero on schedule */
+  .ai-strip{
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .briefing-card{
+    background: linear-gradient(135deg, #eef3ff, #f7f5ff);
+    border: 1px solid #d8e0ff;
+    border-radius: 16px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .briefing-card::after{
+    content: ""; position: absolute; right: -40px; top: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(59,109,242,0.10), transparent 70%);
+  }
+  .briefing-head{
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .ai-chip{
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #fff;
+    border: 1px solid #d8e0ff;
+    color: var(--primary-dark);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .briefing-title{
+    font-weight: 700; font-size: 15px;
+    color: var(--text);
+  }
+  .briefing-points{
+    display: flex; flex-direction: column; gap: 8px;
+    margin: 0; padding: 0; list-style: none;
+  }
+  .briefing-points li{
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13px; color: var(--text);
+    line-height: 1.5;
+  }
+  .briefing-points li svg{ flex-shrink: 0; margin-top: 3px; color: var(--primary); }
+  .briefing-points strong{ color: var(--text); font-weight: 600; }
+  .briefing-foot{
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  .coverage-card{
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+  .coverage-head{
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .coverage-title{ font-weight: 700; font-size: 14px; }
+  .coverage-bar{
+    height: 8px;
+    background: var(--neutral-soft);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .coverage-bar > div{
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), #5fc89e);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .coverage-stat{
+    font-size: 22px; font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .coverage-stat .of{ color: var(--text-subtle); font-weight: 500; font-size: 14px; }
+  .coverage-sub{
+    font-size: 12px; color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .coverage-quiet{
+    font-size: 12px; color: var(--text-subtle);
+    text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .quiet-list{
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .quiet-pill{
+    padding: 4px 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .quiet-pill:hover{ background: var(--primary-soft); color: var(--primary-dark); }
+
+  /* Voice / mic */
+  .input-toolbar{
+    display: flex; gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+  .mic-btn{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, transform 0.15s;
+    flex-shrink: 0;
+  }
+  .mic-btn:hover{ background: #d9e2ff; }
+  .mic-btn.recording{
+    background: var(--danger);
+    color: #fff;
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse{
+    0%, 100% { box-shadow: 0 0 0 0 rgba(196,74,74,0.5); }
+    50% { box-shadow: 0 0 0 8px rgba(196,74,74,0); }
+  }
+  .recording-status{
+    font-size: 12.5px; color: var(--danger); font-weight: 600;
+    display: none; align-items: center; gap: 6px;
+  }
+  .recording-status.show{ display: inline-flex; }
+  .rec-dot{
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--danger);
+    animation: pulse 1.2s infinite;
+  }
+
+  .shorthand-hint{
+    font-size: 11.5px;
+    color: var(--text-subtle);
+    background: var(--surface-2);
+    border: 1px dashed var(--border-strong);
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-top: 8px;
+    display: none;
+    align-items: center; gap: 8px;
+  }
+  .shorthand-hint.show{ display: flex; }
+  .shorthand-hint code{
+    background: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .shorthand-hint button{
+    margin-left: auto;
+    padding: 4px 10px;
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 6px;
+    font-size: 11.5px; font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* Tone meter */
+  .tone-meter{
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .tone-bar{
+    flex: 1;
+    height: 6px;
+    background: var(--neutral-soft);
+    border-radius: 999px;
+    overflow: hidden;
+    display: flex;
+  }
+  .tone-bar .pos{ background: var(--success); height: 100%; transition: width 0.3s; }
+  .tone-bar .neu{ background: #cbd2dd; height: 100%; transition: width 0.3s; }
+  .tone-bar .neg{ background: #d97a7a; height: 100%; transition: width 0.3s; }
+  .tone-label{ flex-shrink: 0; font-weight: 600; }
+
+  /* Sensitivity warning */
+  .sensitivity-warn{
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #fef5e7;
+    border: 1px solid #f0d6a4;
+    border-radius: 10px;
+    font-size: 12.5px;
+    color: #8a6210;
+    display: none;
+    align-items: flex-start; gap: 8px;
+  }
+  .sensitivity-warn.show{ display: flex; }
+  .sensitivity-warn .ico{ flex-shrink: 0; margin-top: 1px; }
+  .sensitivity-warn button{
+    background: #fff;
+    border: 1px solid #f0d6a4;
+    color: #8a6210;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11.5px; font-weight: 600;
+    cursor: pointer;
+    margin-left: auto;
+    font-family: inherit;
+  }
+
+  /* Duplicate banner in review */
+  .duplicate-banner{
+    background: #fff7ec;
+    border: 1px solid #f0d6a4;
+    color: #8a6210;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    font-size: 12.5px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .duplicate-banner button{
+    margin-left: auto;
+    background: #fff;
+    border: 1px solid #f0d6a4;
+    color: #8a6210;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11.5px; font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* Restricted lock badge */
+  .lock-badge{
+    background: #f4ecfb;
+    color: #6c3fb5;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+
+  /* Translation toggle */
+  .lang-toggle{
+    display: inline-flex;
+    background: var(--neutral-soft);
+    border-radius: 8px;
+    padding: 3px;
+    font-size: 12px; font-weight: 600;
+  }
+  .lang-toggle button{
+    border: none;
+    background: transparent;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-family: inherit; font-size: 12px; font-weight: 600;
+  }
+  .lang-toggle button.on{
+    background: #fff;
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Follow-up suggestion banner in history */
+  .followup-suggest{
+    background: linear-gradient(135deg, #fbf2dc, #fef9ec);
+    border: 1px solid #f0d6a4;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px;
+    color: #6a4c10;
+  }
+  .followup-suggest .ico{
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--warning);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .followup-suggest .acts{ margin-left: auto; display: flex; gap: 6px; }
+  .followup-suggest .acts button{
+    border: 1px solid #e6c98a;
+    background: #fff;
+    color: #6a4c10;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* Tone selector in export */
+  .tone-pick{
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+  .tone-pick .label{
+    font-size: 12px; color: var(--text-subtle);
+    text-transform: uppercase; letter-spacing: 0.4px; font-weight: 700;
+    margin-right: 6px;
+  }
+  .tone-chip{
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    cursor: pointer;
+    font-size: 12px; font-weight: 600;
+    color: var(--text-muted);
+  }
+  .tone-chip.active{ background: var(--primary); color:#fff; border-color: var(--primary); }
+
+  /* Recording overlay */
+  .voice-overlay{
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center; justify-content: center;
+    flex-direction: column;
+    border-radius: 12px;
+    z-index: 10;
+  }
+  .voice-overlay.show{ display: flex; }
+  .voice-pulse{
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--danger);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+    animation: pulse 1.2s infinite;
+  }
+  .voice-text{
+    font-weight: 600; color: var(--danger);
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop{
+    position: fixed; inset: 0;
+    background: rgba(20,30,50,0.45);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 900;
+    backdrop-filter: blur(2px);
+  }
+  .modal-backdrop.show{ display: flex; }
+  .modal{
+    background: #fff;
+    border-radius: 16px;
+    width: min(820px, 92vw);
+    max-height: 88vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(20,30,50,0.25);
+    overflow: hidden;
+  }
+  .modal-head{
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-head h3{ margin: 0; font-size: 16px; font-weight: 700; }
+  .modal-head .sub{ color: var(--text-muted); font-size: 12.5px; margin-top: 2px; }
+  .modal-body{
+    padding: 18px 22px;
+    overflow-y: auto;
+  }
+  .modal-foot{
+    padding: 14px 22px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--surface-2);
+  }
+  .export-tabs{
+    display: flex; gap: 4px;
+    background: var(--neutral-soft);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 16px;
+  }
+  .export-tab{
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 7px;
+    font-size: 12.5px; font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: background 0.12s, color 0.12s;
+  }
+  .export-tab:hover{ color: var(--text); }
+  .export-tab.active{ background: #fff; color: var(--text); box-shadow: var(--shadow-sm); }
+  .export-meta{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .export-meta label{
+    font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--text-subtle); font-weight: 700;
+    display: block; margin-bottom: 4px;
+  }
+  .export-meta input{
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    font-family: inherit; font-size: 13px;
+  }
+  .export-textarea{
+    width: 100%;
+    min-height: 320px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    resize: vertical;
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .export-textarea:focus{ outline: 2px solid var(--primary-soft); border-color: var(--primary); background:#fff; }
+  .period-pick{
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .period-chip{
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    cursor: pointer;
+    font-size: 12.5px; font-weight: 600;
+    color: var(--text-muted);
+  }
+  .period-chip.active{ background: var(--primary); color:#fff; border-color: var(--primary); }
+  .modal-helper{
+    background: var(--primary-soft);
+    border: 1px solid #d3deff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--primary-dark);
+    font-size: 12.5px;
+    margin-bottom: 14px;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+
+  /* Settings simple */
+  .settings-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .setting-row{
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .setting-row:last-child{ border-bottom: none; }
+  .switch{
+    width: 36px; height: 20px;
+    background: var(--neutral-soft);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .switch::after{
+    content: "";
+    position: absolute;
+    width: 16px; height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    box-shadow: var(--shadow-sm);
+    transition: left 0.15s;
+  }
+  .switch.on{ background: var(--primary); }
+  .switch.on::after{ left: 18px; }
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================== SIDEBAR ================== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">CF</div>
+      <div>
+        <div class="brand-name">ClassFlow</div>
+        <div style="font-size:11px;color:var(--text-subtle);">Teacher's notebook</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <div class="nav-item active" data-screen="schedule">
+        <span class="ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </span>
+        Weekly Schedule
+      </div>
+      <div class="nav-item" data-screen="lesson">
+        <span class="ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+        </span>
+        Notebook
+      </div>
+      <div class="nav-item" data-screen="history">
+        <span class="ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        Student History
+      </div>
+      <div class="nav-item" data-screen="search">
+        <span class="ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </span>
+        Search
+      </div>
+      <div class="nav-item" data-screen="settings">
+        <span class="ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </span>
+        Settings
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">EL</div>
+      <div>
+        <div class="user-name">Elin Lundberg</div>
+        <div class="user-role">Math & Swedish · Year 7–9</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================== MAIN ================== -->
+  <main class="main">
+
+    <!-- ============= SCREEN 1: WEEKLY SCHEDULE ============= -->
+    <section id="screen-schedule" class="screen active">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Weekly Schedule</h1>
+          <p class="page-subtitle">Click any lesson to open your digital notebook.</p>
+        </div>
+        <div class="topbar-actions">
+          <div class="week-nav">
+            <button>‹</button>
+            <span class="week-label">Week 19 · May 2026</span>
+            <button>›</button>
+          </div>
+          <button class="btn btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Add lesson
+          </button>
+        </div>
+      </div>
+
+      <div class="ai-strip">
+        <div class="briefing-card">
+          <div class="briefing-head">
+            <span class="ai-chip">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg>
+              Briefing
+            </span>
+            <div class="briefing-title" id="briefing-title">Mathematics 7A · in a few minutes</div>
+          </div>
+          <ul class="briefing-points" id="briefing-points"></ul>
+          <div class="briefing-foot">Generated from your previous notes. ClassFlow suggests — you decide what to focus on.</div>
+        </div>
+
+        <div class="coverage-card">
+          <div class="coverage-head">
+            <span class="ai-chip">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Coverage
+            </span>
+            <div class="coverage-title" id="coverage-title">Class 7A · this week</div>
+          </div>
+          <div class="coverage-stat" id="coverage-stat"></div>
+          <div class="coverage-bar"><div id="coverage-bar-fill" style="width:0%"></div></div>
+          <div class="coverage-sub" id="coverage-sub"></div>
+          <div class="coverage-quiet">Not yet noted</div>
+          <div class="quiet-list" id="quiet-list"></div>
+        </div>
+      </div>
+
+      <div class="week-grid" id="week-grid"></div>
+    </section>
+
+    <!-- ============= SCREEN 2: LESSON CAPTURE ============= -->
+    <section id="screen-lesson" class="screen">
+      <div class="back-link" onclick="navigate('schedule')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        Back to schedule
+      </div>
+
+      <div class="lesson-header">
+        <div class="left">
+          <h2 id="lesson-title">Mathematics 7A</h2>
+          <div class="meta" id="lesson-meta">08:30–09:40 · Room B203 · 28 students</div>
+        </div>
+        <div>
+          <span class="badge now">Now</span>
+        </div>
+      </div>
+
+      <div class="lesson-grid">
+        <!-- Student list -->
+        <div class="card student-list">
+          <h3>Students</h3>
+          <input type="text" class="student-search" id="student-search" placeholder="Search student..." />
+          <div id="student-list-container"></div>
+        </div>
+
+        <!-- Notebook -->
+        <div class="card notebook">
+          <div class="notebook-label">
+            <span>Quick observation</span>
+            <span class="helper-text">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              Click a name, type freely, use the mic, or shorthand like <code style="background:var(--surface-2);padding:1px 5px;border-radius:4px;font-size:11px;">K sen 5m</code>
+            </span>
+          </div>
+
+          <div class="input-toolbar">
+            <button class="mic-btn" id="mic-btn" onclick="toggleVoice()" title="Voice note">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+            </button>
+            <span class="recording-status" id="recording-status">
+              <span class="rec-dot"></span> Listening… speak naturally
+            </span>
+          </div>
+
+          <div style="position:relative;">
+            <textarea
+              id="observation"
+              class="observation-box"
+              placeholder="Example: Kalle came 5 minutes late, Lisa forgot her material, Erik disturbed the explanation, Sara helped her group."></textarea>
+            <div class="voice-overlay" id="voice-overlay">
+              <div class="voice-pulse">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+              </div>
+              <div class="voice-text">Listening…</div>
+              <div style="font-size:11.5px;color:var(--text-muted);margin-top:6px;">Tap mic again to stop</div>
+            </div>
+          </div>
+
+          <div class="shorthand-hint" id="shorthand-hint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary);"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <span id="shorthand-text"></span>
+            <button onclick="applyShorthand()">Expand</button>
+          </div>
+
+          <div class="tone-meter" id="tone-meter" style="display:none;">
+            <span class="tone-label">Tone of this note:</span>
+            <div class="tone-bar" id="tone-bar">
+              <div class="pos" style="width:0%"></div>
+              <div class="neu" style="width:0%"></div>
+              <div class="neg" style="width:0%"></div>
+            </div>
+            <span id="tone-summary" style="font-weight:600;"></span>
+          </div>
+
+          <div class="sensitivity-warn" id="sensitivity-warn">
+            <span class="ico">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <div>
+              <strong>Sensitive content detected.</strong>
+              This note may contain personal info (home, health, family). Mark as restricted so it's hidden from generated emails by default.
+            </div>
+            <button onclick="markRestricted()">Mark restricted</button>
+          </div>
+
+          <div class="suggestion-box" id="suggestion-box">
+            <div class="label">Suggested students</div>
+            <div id="suggestion-list"></div>
+          </div>
+
+          <div class="notebook-actions">
+            <span class="helper-text">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              ClassFlow will structure this for your review.
+            </span>
+            <button class="btn btn-primary" onclick="captureObservation()">
+              Capture observation
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SCREEN 3: REVIEW ============= -->
+    <section id="screen-review" class="screen">
+      <div class="back-link" onclick="navigate('lesson')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        Back to notebook
+      </div>
+
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Review structured notes</h1>
+          <p class="page-subtitle">ClassFlow only structures your notes. You always review and approve before anything is saved.</p>
+        </div>
+      </div>
+
+      <div class="review-banner">
+        <div class="ico">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div>
+          <strong>AI suggests. The teacher decides.</strong>
+          Edit, remove, or approve each row below — nothing is saved to student history until you confirm.
+        </div>
+      </div>
+
+      <div id="duplicate-summary"></div>
+      <div class="review-list" id="review-list"></div>
+
+      <div class="review-footer">
+        <div class="review-summary" id="review-summary">0 of 0 selected</div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-secondary" onclick="navigate('lesson')">Cancel</button>
+          <button class="btn btn-primary" onclick="approveAndSave()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Approve and save
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SCREEN 4: STUDENT HISTORY ============= -->
+    <section id="screen-history" class="screen">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Student History</h1>
+          <p class="page-subtitle">Every observation, organized by student and category.</p>
+        </div>
+      </div>
+
+      <div class="history-grid">
+        <div class="card student-roster">
+          <input type="text" class="student-search" id="roster-search" placeholder="Find student..." style="margin-bottom:10px;"/>
+          <div id="roster-container"></div>
+        </div>
+
+        <div class="card student-profile" id="student-profile"></div>
+      </div>
+    </section>
+
+    <!-- ============= SCREEN 5: SEARCH ============= -->
+    <section id="screen-search" class="screen">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Ask ClassFlow</h1>
+          <p class="page-subtitle">Find what happened, when it happened, and what to remember.</p>
+        </div>
+      </div>
+
+      <div class="search-hero">
+        <h2>What would you like to know?</h2>
+        <p>Write in 10 seconds. Find it weeks later.</p>
+        <div class="search-bar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a93a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="search-input" placeholder="Ask ClassFlow..." />
+          <button class="btn btn-primary" onclick="runSearch()">Ask</button>
+        </div>
+        <div class="suggested-questions">
+          <div class="suggested-q" onclick="askExample('What happened with Kalle this month?')">What happened with Kalle this month?</div>
+          <div class="suggested-q" onclick="askExample('Which students forgot material this week?')">Which students forgot material this week?</div>
+          <div class="suggested-q" onclick="askExample('Show positive observations for Sara.')">Show positive observations for Sara.</div>
+          <div class="suggested-q" onclick="askExample('What should I remember before the mentor meeting?')">What should I remember before the mentor meeting?</div>
+        </div>
+      </div>
+
+      <div class="card answer-card" id="answer-card"></div>
+    </section>
+
+    <!-- ============= SCREEN: SETTINGS ============= -->
+    <section id="screen-settings" class="screen">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Settings</h1>
+          <p class="page-subtitle">Tune how ClassFlow behaves. Your notes always stay yours.</p>
+        </div>
+      </div>
+
+      <div class="card card-pad" style="max-width:720px;">
+        <h3 style="margin:0 0 10px; font-size:14px; color:var(--text-subtle); text-transform:uppercase; letter-spacing:0.5px;">Notebook</h3>
+        <div class="setting-row">
+          <div>
+            <div style="font-weight:600;">Smart name suggestions</div>
+            <div style="font-size:12.5px;color:var(--text-muted);">Suggest student names while typing.</div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div style="font-weight:600;">Auto-detect categories</div>
+            <div style="font-size:12.5px;color:var(--text-muted);">Suggest a category for each observation.</div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div style="font-weight:600;">Always require approval</div>
+            <div style="font-size:12.5px;color:var(--text-muted);">Notes are never saved without you confirming.</div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+
+        <h3 style="margin:24px 0 10px; font-size:14px; color:var(--text-subtle); text-transform:uppercase; letter-spacing:0.5px;">Privacy</h3>
+        <div class="setting-row">
+          <div>
+            <div style="font-weight:600;">Local storage only</div>
+            <div style="font-size:12.5px;color:var(--text-muted);">Notes stay on your device unless you export.</div>
+          </div>
+          <div class="switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ================== EXPORT MODAL ================== -->
+<div class="modal-backdrop" id="export-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3 id="export-title">Generate document</h3>
+        <div class="sub" id="export-sub">Draft material from this student's observations</div>
+      </div>
+      <button class="icon-btn" onclick="closeExport()" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="export-tabs" id="export-tabs">
+        <div class="export-tab active" data-kind="mentor">Mentor</div>
+        <div class="export-tab" data-kind="teacher">Colleague</div>
+        <div class="export-tab" data-kind="conference">Utvecklingssamtal</div>
+        <div class="export-tab" data-kind="substitute">Substitute briefing</div>
+        <div class="export-tab" data-kind="reflection">My reflection</div>
+      </div>
+
+      <div class="tone-pick" id="tone-pick">
+        <span class="label">Tone</span>
+        <div class="tone-chip active" data-tone="warm">Warm</div>
+        <div class="tone-chip" data-tone="formal">Formal</div>
+        <div class="tone-chip" data-tone="short">Short</div>
+        <div class="tone-chip" data-tone="detailed">Detailed</div>
+      </div>
+
+      <div id="restricted-note" style="display:none;"></div>
+
+      <div class="modal-helper">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <div>
+          <strong>Draft only.</strong> ClassFlow generates a starting point from your approved notes. Read it through, edit freely, then copy or send from your own mail client.
+        </div>
+      </div>
+
+      <div class="period-pick" id="period-pick">
+        <span style="font-size:12px; color:var(--text-subtle); align-self:center; margin-right:6px; text-transform:uppercase; letter-spacing:0.4px; font-weight:700;">Period</span>
+        <div class="period-chip" data-period="week">This week</div>
+        <div class="period-chip active" data-period="month">This month</div>
+        <div class="period-chip" data-period="term">This term</div>
+        <div class="period-chip" data-period="all">All time</div>
+      </div>
+
+      <div class="export-meta" id="export-meta"></div>
+      <textarea class="export-textarea" id="export-textarea" spellcheck="true"></textarea>
+    </div>
+    <div class="modal-foot">
+      <div style="font-size:12px; color:var(--text-subtle);" id="export-stats"></div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-secondary" onclick="closeExport()">Cancel</button>
+        <button class="btn btn-secondary" onclick="downloadExport()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download .txt
+        </button>
+        <button class="btn btn-primary" onclick="copyExport()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy to clipboard
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Demo data
+   ========================================================= */
+
+const students = [
+  { id: 1, name: "Kalle Andersson", class: "7A" },
+  { id: 2, name: "Lisa Berg", class: "7A" },
+  { id: 3, name: "Erik Lind", class: "7A" },
+  { id: 4, name: "Sara Nilsson", class: "7A" },
+  { id: 5, name: "Amir Hassan", class: "7A" },
+  { id: 6, name: "Elin Karlsson", class: "7A" },
+  { id: 7, name: "Noah Persson", class: "7A" },
+  { id: 8, name: "Maya Lindström", class: "7A" },
+];
+
+const schedule = {
+  Monday: [
+    { id:"m1", time:"08:30–09:40", title:"Mathematics 7A", room:"B203", students:28, status:"now", type:"lesson" },
+    { id:"m2", time:"10:10–11:20", title:"Swedish 8B", room:"C104", students:24, status:"upcoming", type:"lesson" },
+    { id:"m3", time:"12:30–13:00", title:"Mentor Team Meeting", room:"Staff Room", status:"upcoming", type:"meeting" },
+    { id:"m4", time:"14:00–15:10", title:"Mathematics 9C", room:"B205", students:31, status:"upcoming", type:"lesson" },
+  ],
+  Tuesday: [
+    { id:"t1", time:"09:00–10:10", title:"Mathematics 8A", room:"B204", students:26, status:"upcoming", type:"lesson" },
+    { id:"t2", time:"10:30–11:00", title:"EHT Meeting", room:"Conference Room", status:"upcoming", type:"meeting" },
+    { id:"t3", time:"13:00–14:10", title:"Swedish 7B", room:"C102", students:27, status:"upcoming", type:"lesson" },
+  ],
+  Wednesday: [
+    { id:"w1", time:"08:30–09:40", title:"Swedish 9A", room:"C101", students:25, status:"upcoming", type:"lesson" },
+    { id:"w2", time:"11:00–12:10", title:"Mathematics 7A", room:"B203", students:28, status:"upcoming", type:"lesson" },
+    { id:"w3", time:"13:30–14:40", title:"Mathematics 8A", room:"B204", students:26, status:"upcoming", type:"lesson" },
+  ],
+  Thursday: [
+    { id:"th1", time:"09:00–10:10", title:"Mathematics 9C", room:"B205", students:31, status:"upcoming", type:"lesson" },
+    { id:"th2", time:"10:30–11:00", title:"Subject Team — Math", room:"B210", status:"upcoming", type:"meeting" },
+    { id:"th3", time:"13:00–14:10", title:"Swedish 8B", room:"C104", students:24, status:"upcoming", type:"lesson" },
+  ],
+  Friday: [
+    { id:"f1", time:"08:30–09:40", title:"Swedish 7B", room:"C102", students:27, status:"upcoming", type:"lesson" },
+    { id:"f2", time:"10:10–11:20", title:"Mathematics 7A", room:"B203", students:28, status:"upcoming", type:"lesson" },
+    { id:"f3", time:"13:00–13:45", title:"Parent Communication", room:"B203", status:"upcoming", type:"meeting" },
+  ],
+};
+
+const dayDates = {
+  Monday: "May 4", Tuesday: "May 5", Wednesday: "May 6",
+  Thursday: "May 7", Friday: "May 8"
+};
+
+// Pre-existing student history (Swedish school context, English UI)
+let history = [
+  { studentId:1, date:"3 May",     dateRank: 3, observation:"Forgot material",                lesson:"Mathematics 7A", category:"Missing material" },
+  { studentId:1, date:"28 April",  dateRank: 1, observation:"Participated actively in group work", lesson:"Mathematics 7A", category:"Positive observation" },
+  { studentId:2, date:"30 April",  dateRank: 2, observation:"Helped a classmate with fractions",   lesson:"Mathematics 7A", category:"Positive observation" },
+  { studentId:2, date:"22 April",  dateRank: 0, observation:"Late arrival",                         lesson:"Swedish 7B",     category:"Late arrival" },
+  { studentId:3, date:"2 May",     dateRank: 2, observation:"Talked over the explanation",         lesson:"Swedish 8B",     category:"Classroom disruption" },
+  { studentId:4, date:"29 April",  dateRank: 1, observation:"Excellent presentation on geometry",  lesson:"Mathematics 7A", category:"Positive observation" },
+  { studentId:5, date:"4 May",     dateRank: 3, observation:"Needs follow-up on missing homework", lesson:"Mathematics 7A", category:"Needs follow-up" },
+  { studentId:6, date:"25 April",  dateRank: 0, observation:"Finished early and helped peers",     lesson:"Mathematics 7A", category:"Positive observation" },
+  { studentId:7, date:"1 May",     dateRank: 2, observation:"Forgot textbook again",               lesson:"Swedish 8B",     category:"Missing material" },
+  { studentId:8, date:"3 May",     dateRank: 3, observation:"Asked thoughtful questions",          lesson:"Mathematics 7A", category:"Positive observation" },
+];
+
+const categories = ["All", "Late arrival", "Missing material", "Classroom disruption", "Positive observation", "Needs follow-up"];
+
+let currentLesson = schedule.Monday[0];
+let pendingReview = []; // structured rows awaiting approval
+let activeStudentId = 1;
+let activeFilter = "All";
+let suggestionIndex = -1;
+
+/* =========================================================
+   Utility
+   ========================================================= */
+function initials(name){
+  return name.split(/\s+/).map(s=>s[0]).slice(0,2).join("").toUpperCase();
+}
+function categoryClass(cat){
+  switch(cat){
+    case "Late arrival": return "cat-late";
+    case "Missing material": return "cat-missing";
+    case "Classroom disruption": return "cat-disrupt";
+    case "Positive observation": return "cat-positive";
+    case "Needs follow-up": return "cat-followup";
+    default: return "cat-neutral";
+  }
+}
+function showToast(msg, kind){
+  const t = document.getElementById('toast');
+  t.innerHTML = (kind === 'success'
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7be0ad" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'
+      : '') + ' ' + msg;
+  t.classList.add('show');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+/* =========================================================
+   Navigation
+   ========================================================= */
+function navigate(screen){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.toggle('active', n.dataset.screen === screen);
+  });
+  // Re-render dependent screens
+  if(screen === 'history') renderHistory();
+  if(screen === 'lesson') renderLesson();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.querySelectorAll('.nav-item').forEach(n=>{
+  n.addEventListener('click', ()=> navigate(n.dataset.screen));
+});
+
+/* =========================================================
+   SCREEN 1 — Weekly Schedule
+   ========================================================= */
+function renderSchedule(){
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+  Object.keys(schedule).forEach(day=>{
+    const col = document.createElement('div');
+    col.className = 'day-col';
+    col.innerHTML = `
+      <div class="day-head">
+        <div class="day-name">${day}</div>
+        <div class="day-date">${dayDates[day]}</div>
+      </div>
+      <div class="day-body" id="day-${day}"></div>
+    `;
+    grid.appendChild(col);
+    const body = col.querySelector('.day-body');
+    schedule[day].forEach(item=>{
+      const card = document.createElement('div');
+      card.className = `lesson-card ${item.type === 'meeting' ? 'meeting' : ''} ${item.status}`;
+      const badge = item.type === 'meeting'
+        ? `<span class="badge meeting">Meeting</span>`
+        : `<span class="badge ${item.status}">${item.status === 'now' ? 'Now' : item.status === 'upcoming' ? 'Upcoming' : 'Completed'}</span>`;
+      card.innerHTML = `
+        <div class="accent"></div>
+        <div class="lesson-time"><span>${item.time}</span>${badge}</div>
+        <div class="lesson-title">${item.title}</div>
+        <div class="lesson-meta">${item.room}${item.students ? ` · ${item.students} students` : ''}</div>
+      `;
+      card.addEventListener('click', ()=> openLesson(item));
+      body.appendChild(card);
+    });
+  });
+}
+function openLesson(item){
+  if(item.type === 'meeting'){
+    showToast('Meeting opened — ' + item.title);
+    return;
+  }
+  currentLesson = item;
+  navigate('lesson');
+}
+
+/* =========================================================
+   SCREEN 2 — Lesson Capture
+   ========================================================= */
+function renderLesson(){
+  document.getElementById('lesson-title').textContent = currentLesson.title;
+  document.getElementById('lesson-meta').textContent =
+    `${currentLesson.time} · Room ${currentLesson.room}${currentLesson.students ? ` · ${currentLesson.students} students` : ''}`;
+
+  renderStudentList(students);
+  document.getElementById('observation').value = '';
+  document.getElementById('suggestion-box').classList.remove('show');
+}
+function renderStudentList(list){
+  const c = document.getElementById('student-list-container');
+  c.innerHTML = '';
+  list.forEach(s=>{
+    const el = document.createElement('div');
+    el.className = 'student-item';
+    el.innerHTML = `
+      <div class="student-avatar">${initials(s.name)}</div>
+      <div>${s.name}</div>
+    `;
+    el.addEventListener('click', ()=> insertStudentName(s.name));
+    c.appendChild(el);
+  });
+}
+
+document.getElementById('student-search').addEventListener('input', e=>{
+  const q = e.target.value.toLowerCase();
+  renderStudentList(students.filter(s => s.name.toLowerCase().includes(q)));
+});
+
+function insertStudentName(name){
+  const ta = document.getElementById('observation');
+  const cur = ta.value;
+  const sep = (cur.length === 0 || /\n$/.test(cur) || /\.\s*$/.test(cur.trim())) ? '' : '\n';
+  // If we're mid-word (typed "Ka" then click suggestion) — replace the partial word
+  const partial = currentPartialWord(ta);
+  if(partial){
+    const start = ta.selectionStart - partial.length;
+    ta.value = cur.substring(0, start) + name + ' — ' + cur.substring(ta.selectionStart);
+    ta.selectionStart = ta.selectionEnd = start + name.length + 3;
+  } else {
+    ta.value = cur + sep + name + ' — ';
+    ta.selectionStart = ta.selectionEnd = ta.value.length;
+  }
+  ta.focus();
+  document.getElementById('suggestion-box').classList.remove('show');
+}
+
+function currentPartialWord(ta){
+  const pos = ta.selectionStart;
+  const before = ta.value.substring(0, pos);
+  const m = before.match(/([A-Za-zÅÄÖåäö]+)$/);
+  return m ? m[1] : '';
+}
+
+document.getElementById('observation').addEventListener('input', e=>{
+  const ta = e.target;
+  const partial = currentPartialWord(ta);
+  const box = document.getElementById('suggestion-box');
+  const list = document.getElementById('suggestion-list');
+  if(partial && partial.length >= 2){
+    const matches = students.filter(s =>
+      s.name.toLowerCase().split(/\s+/).some(part => part.startsWith(partial.toLowerCase()))
+    ).slice(0,5);
+    if(matches.length){
+      list.innerHTML = '';
+      matches.forEach((s,i)=>{
+        const item = document.createElement('div');
+        item.className = 'suggestion-item' + (i===0 ? ' active' : '');
+        item.innerHTML = `<div class="student-avatar">${initials(s.name)}</div><div>${highlight(s.name, partial)}</div>`;
+        item.addEventListener('click', ()=> insertStudentName(s.name));
+        list.appendChild(item);
+      });
+      box.classList.add('show');
+      suggestionIndex = 0;
+      return;
+    }
+  }
+  box.classList.remove('show');
+});
+
+function highlight(name, q){
+  const re = new RegExp('('+escapeRe(q)+')', 'i');
+  return name.replace(re, '<strong style="color:var(--primary-dark);">$1</strong>');
+}
+function escapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+document.getElementById('observation').addEventListener('keydown', e=>{
+  const box = document.getElementById('suggestion-box');
+  if(!box.classList.contains('show')) return;
+  const items = box.querySelectorAll('.suggestion-item');
+  if(e.key === 'ArrowDown'){
+    e.preventDefault();
+    suggestionIndex = Math.min(items.length-1, suggestionIndex+1);
+    items.forEach((el,i)=> el.classList.toggle('active', i===suggestionIndex));
+  } else if(e.key === 'ArrowUp'){
+    e.preventDefault();
+    suggestionIndex = Math.max(0, suggestionIndex-1);
+    items.forEach((el,i)=> el.classList.toggle('active', i===suggestionIndex));
+  } else if(e.key === 'Enter' || e.key === 'Tab'){
+    if(suggestionIndex >= 0 && items[suggestionIndex]){
+      e.preventDefault();
+      items[suggestionIndex].click();
+    }
+  } else if(e.key === 'Escape'){
+    box.classList.remove('show');
+  }
+});
+
+/* =========================================================
+   SCREEN 3 — AI Review
+   ========================================================= */
+function captureObservation(){
+  const text = document.getElementById('observation').value.trim();
+  if(!text){
+    showToast('Write a quick observation first');
+    return;
+  }
+  pendingReview = parseObservation(text);
+  if(pendingReview.length === 0){
+    // fallback: one row, no student inferred
+    pendingReview = [{
+      studentName: "(unassigned)",
+      observation: text,
+      category: "Needs follow-up",
+      lesson: currentLesson.title,
+      date: "Today",
+      approved: true
+    }];
+  }
+  renderReview();
+  navigate('review');
+}
+
+function parseObservation(text){
+  // Split by commas, semicolons, newlines, " and ", or "·"
+  const parts = text.split(/[\n;·]|,\s+(?=[A-ZÅÄÖ])| and (?=[A-ZÅÄÖ])/g)
+    .map(s=>s.trim()).filter(Boolean);
+
+  const rows = [];
+  parts.forEach(part=>{
+    let studentName = null;
+    let observation = part;
+
+    // Pattern: "Name — text" or "Name - text"
+    let m = part.match(/^([A-ZÅÄÖ][\wåäöÅÄÖ-]+(?:\s+[A-ZÅÄÖ][\wåäöÅÄÖ-]+)?)\s*[—\-:]\s*(.+)$/);
+    if(m){
+      const candidate = matchStudent(m[1]);
+      if(candidate){ studentName = candidate; observation = m[2]; }
+    }
+    // Else try first 1-2 words as name
+    if(!studentName){
+      const tokens = part.split(/\s+/);
+      for(let take=2; take>=1; take--){
+        if(tokens.length < take) continue;
+        const guess = tokens.slice(0, take).join(' ');
+        const candidate = matchStudent(guess);
+        if(candidate){
+          studentName = candidate;
+          observation = tokens.slice(take).join(' ').replace(/^[—\-:,\s]+/,'').trim();
+          if(!observation) observation = part;
+          break;
+        }
+      }
+    }
+    if(!studentName) studentName = "(unassigned)";
+
+    rows.push({
+      studentName,
+      observation: observation.charAt(0).toUpperCase() + observation.slice(1),
+      category: detectCategory(observation),
+      lesson: currentLesson.title,
+      date: "Today",
+      approved: true
+    });
+  });
+  return rows;
+}
+
+function matchStudent(text){
+  const q = text.trim().toLowerCase();
+  // exact full or first-name match
+  const exact = students.find(s => s.name.toLowerCase() === q);
+  if(exact) return exact.name;
+  const first = students.find(s => s.name.toLowerCase().split(' ')[0] === q);
+  if(first) return first.name;
+  // starts-with first or full
+  const sw = students.find(s => s.name.toLowerCase().startsWith(q));
+  if(sw) return sw.name;
+  return null;
+}
+
+function detectCategory(text){
+  const t = text.toLowerCase();
+  if(/\blate\b|came (\d+)? ?min(ute)?s? late|sen|försenad/.test(t)) return "Late arrival";
+  if(/forgot|missing|no (book|material|pen|pencil)|glömt|saknar/.test(t)) return "Missing material";
+  if(/disturb|interrupt|talked over|disruption|störd|prata/.test(t)) return "Classroom disruption";
+  if(/help(ed)?|excellent|great|positive|active|finished early|asked thoughtful|presentation|hjälp/.test(t)) return "Positive observation";
+  if(/follow(\s|-)?up|needs|reminder|uppföljning/.test(t)) return "Needs follow-up";
+  return "Positive observation";
+}
+
+function renderReview(){
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  pendingReview.forEach((row, idx)=>{
+    const el = document.createElement('div');
+    el.className = 'review-row' + (row.approved ? ' approved' : '');
+    el.innerHTML = `
+      <div class="review-check ${row.approved ? 'checked':''}" data-idx="${idx}">
+        ${row.approved ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>` : ''}
+      </div>
+      <div class="review-content">
+        <div class="review-student">
+          <div class="student-avatar">${initials(row.studentName === '(unassigned)' ? '? ?' : row.studentName)}</div>
+          ${row.studentName}
+        </div>
+        <div class="review-observation" data-idx="${idx}">${row.observation}</div>
+        <div class="review-tags">
+          <span class="tag ${categoryClass(row.category)}">${row.category}</span>
+          <span class="tag">${row.lesson}</span>
+          <span class="tag">${row.date}</span>
+        </div>
+      </div>
+      <div class="review-actions">
+        <button class="icon-btn" title="Edit" onclick="editReviewRow(${idx})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        </button>
+        <button class="icon-btn danger" title="Delete" onclick="deleteReviewRow(${idx})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+  list.querySelectorAll('.review-check').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      const i = +c.dataset.idx;
+      pendingReview[i].approved = !pendingReview[i].approved;
+      renderReview();
+    });
+  });
+  updateReviewSummary();
+}
+function updateReviewSummary(){
+  const approved = pendingReview.filter(r=>r.approved).length;
+  document.getElementById('review-summary').textContent =
+    `${approved} of ${pendingReview.length} approved · ready to save to student history`;
+}
+function editReviewRow(idx){
+  const el = document.querySelector(`.review-observation[data-idx="${idx}"]`);
+  el.contentEditable = "true";
+  el.focus();
+  document.execCommand('selectAll', false, null);
+  el.addEventListener('blur', function done(){
+    pendingReview[idx].observation = el.innerText.trim();
+    pendingReview[idx].category = detectCategory(pendingReview[idx].observation);
+    el.contentEditable = "false";
+    renderReview();
+    el.removeEventListener('blur', done);
+  });
+}
+function deleteReviewRow(idx){
+  pendingReview.splice(idx,1);
+  renderReview();
+}
+function approveAndSave(){
+  const approved = pendingReview.filter(r=>r.approved && r.studentName !== '(unassigned)');
+  if(approved.length === 0){
+    showToast('Approve at least one row to save.');
+    return;
+  }
+  approved.forEach(r=>{
+    const s = students.find(st => st.name === r.studentName);
+    if(!s) return;
+    history.unshift({
+      studentId: s.id,
+      date: "Today",
+      dateRank: 4,
+      observation: r.observation,
+      lesson: r.lesson,
+      category: r.category
+    });
+  });
+  showToast(`Saved ${approved.length} observation${approved.length>1?'s':''} to student history`, 'success');
+  pendingReview = [];
+  navigate('history');
+}
+
+/* =========================================================
+   SCREEN 4 — Student History
+   ========================================================= */
+function renderHistory(){
+  // Roster
+  const roster = document.getElementById('roster-container');
+  roster.innerHTML = '';
+  const q = (document.getElementById('roster-search').value || '').toLowerCase();
+  students.filter(s => s.name.toLowerCase().includes(q)).forEach(s=>{
+    const count = history.filter(h => h.studentId === s.id).length;
+    const el = document.createElement('div');
+    el.className = 'roster-item' + (s.id === activeStudentId ? ' active' : '');
+    el.innerHTML = `
+      <div class="student-avatar">${initials(s.name)}</div>
+      <div style="flex:1; min-width:0;">
+        <div class="roster-name">${s.name}</div>
+        <div class="roster-meta">Class ${s.class} · ${count} note${count===1?'':'s'}</div>
+      </div>
+    `;
+    el.addEventListener('click', ()=>{ activeStudentId = s.id; renderHistory(); });
+    roster.appendChild(el);
+  });
+
+  // Profile
+  const student = students.find(s => s.id === activeStudentId);
+  const profile = document.getElementById('student-profile');
+  const studentHistory = history
+    .filter(h => h.studentId === student.id)
+    .filter(h => activeFilter === "All" || h.category === activeFilter)
+    .sort((a,b) => b.dateRank - a.dateRank);
+
+  // Follow-up suggestion (e.g. 2+ same-category notes recently)
+  const allForStudent = history.filter(h => h.studentId === student.id);
+  const recurringCategory = detectRecurringPattern(allForStudent);
+
+  profile.innerHTML = `
+    <div class="profile-head">
+      <div class="profile-avatar">${initials(student.name)}</div>
+      <div style="flex:1;">
+        <h2 class="profile-name">${student.name}</h2>
+        <div class="profile-class">Class ${student.class} · ${allForStudent.length} total observations</div>
+      </div>
+      <div class="lang-toggle" style="margin-right:10px;">
+        <button class="${displayLang==='en'?'on':''}" onclick="setLang('en')">EN</button>
+        <button class="${displayLang==='sv'?'on':''}" onclick="setLang('sv')">SV</button>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="openExport()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        Generate document
+      </button>
+    </div>
+
+    ${recurringCategory ? `
+      <div class="followup-suggest">
+        <div class="ico">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        </div>
+        <div>
+          <strong>${student.name}</strong> has <strong>${recurringCategory.count} ${recurringCategory.cat.toLowerCase()}</strong> notes — looks like a pattern worth acting on.
+        </div>
+        <div class="acts">
+          <button onclick="openExport()">Draft email</button>
+          <button onclick="dismissFollowup('${student.id}')">Dismiss</button>
+        </div>
+      </div>
+    ` : ''}
+
+    <div class="filter-chips" id="filter-chips">
+      ${categories.map(c => `<div class="chip ${c===activeFilter?'active':''}" data-cat="${c}">${c}</div>`).join('')}
+    </div>
+
+    <div class="timeline">
+      ${studentHistory.length ? studentHistory.map(h => `
+        <div class="timeline-item">
+          <div class="timeline-date">${h.date}</div>
+          <div>
+            <div class="timeline-text">${displayObservation(h)} ${h.restricted ? '<span class="lock-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Restricted</span>' : ''}</div>
+            <div class="timeline-context">${h.lesson}</div>
+          </div>
+          <span class="tag ${categoryClass(h.category)}">${categoryDisplay(h.category)}</span>
+        </div>
+      `).join('') : `<div class="empty">No observations match this filter.</div>`}
+    </div>
+  `;
+
+  profile.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      activeFilter = chip.dataset.cat;
+      renderHistory();
+    });
+  });
+}
+document.getElementById('roster-search').addEventListener('input', renderHistory);
+
+/* =========================================================
+   SCREEN 5 — Search
+   ========================================================= */
+function askExample(q){
+  document.getElementById('search-input').value = q;
+  runSearch();
+}
+function runSearch(){
+  const q = document.getElementById('search-input').value.trim();
+  if(!q) return;
+  const card = document.getElementById('answer-card');
+  card.classList.add('show');
+  card.innerHTML = renderAnswer(q);
+}
+function renderAnswer(q){
+  const ql = q.toLowerCase();
+
+  // Try to find a referenced student name
+  let student = students.find(s => ql.includes(s.name.toLowerCase().split(' ')[0]));
+
+  // Category intent
+  let cat = null;
+  if(/forgot|missing material/.test(ql)) cat = "Missing material";
+  else if(/late|tardy/.test(ql)) cat = "Late arrival";
+  else if(/positive/.test(ql)) cat = "Positive observation";
+  else if(/disrupt|disturb/.test(ql)) cat = "Classroom disruption";
+  else if(/follow.?up|remember/.test(ql)) cat = "Needs follow-up";
+
+  // Branch: question about a single student
+  if(student){
+    const items = history
+      .filter(h => h.studentId === student.id)
+      .filter(h => !cat || h.category === cat)
+      .sort((a,b) => b.dateRank - a.dateRank);
+
+    const counts = {};
+    items.forEach(h => counts[h.category] = (counts[h.category]||0)+1);
+
+    return `
+      <div class="answer-head">
+        <div class="ico">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+        </div>
+        <div class="answer-question">${q}</div>
+      </div>
+      <div class="answer-summary">
+        <strong>${student.name}</strong> has <strong>${items.length}</strong> ${cat ? cat.toLowerCase()+' ' : ''}observation${items.length===1?'':'s'}${cat? '' : ' this month'}.
+      </div>
+      <div class="answer-list">
+        ${items.length ? items.map(h => `
+          <div class="timeline-item">
+            <div class="timeline-date">${h.date}</div>
+            <div>
+              <div class="timeline-text">${h.observation}</div>
+              <div class="timeline-context">${h.lesson}</div>
+            </div>
+            <span class="tag ${categoryClass(h.category)}">${h.category}</span>
+          </div>
+        `).join('') : `<div class="empty">No matching notes.</div>`}
+      </div>
+      ${items.length ? `
+      <div class="pattern-card">
+        <h4>Pattern</h4>
+        ${Object.entries(counts).map(([c,n])=>`
+          <div class="pattern-row"><span>${c}</span><span class="pattern-count">${n} time${n===1?'':'s'}</span></div>
+        `).join('')}
+      </div>` : ''}
+    `;
+  }
+
+  // Branch: category question across students this week / month
+  if(cat){
+    const matches = history.filter(h => h.category === cat);
+    return `
+      <div class="answer-head">
+        <div class="ico">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        </div>
+        <div class="answer-question">${q}</div>
+      </div>
+      <div class="answer-summary">
+        Found <strong>${matches.length}</strong> note${matches.length===1?'':'s'} in <strong>${cat}</strong>.
+      </div>
+      <div class="answer-list">
+        ${matches.map(h => {
+          const s = students.find(st=>st.id===h.studentId);
+          return `
+            <div class="timeline-item">
+              <div class="timeline-date">${h.date}</div>
+              <div>
+                <div class="timeline-text"><strong>${s ? s.name : ''}</strong> — ${h.observation}</div>
+                <div class="timeline-context">${h.lesson}</div>
+              </div>
+              <span class="tag ${categoryClass(h.category)}">${h.category}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  // Branch: "what should I remember before mentor meeting"
+  if(/mentor|meeting|remember/.test(ql)){
+    const followUp = history.filter(h => h.category === 'Needs follow-up' || h.category === 'Late arrival' || h.category === 'Missing material');
+    return `
+      <div class="answer-head">
+        <div class="ico">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="answer-question">${q}</div>
+      </div>
+      <div class="answer-summary">
+        Here are <strong>${followUp.length}</strong> open items worth mentioning at the mentor meeting.
+      </div>
+      <div class="answer-list">
+        ${followUp.map(h => {
+          const s = students.find(st=>st.id===h.studentId);
+          return `
+            <div class="timeline-item">
+              <div class="timeline-date">${h.date}</div>
+              <div>
+                <div class="timeline-text"><strong>${s ? s.name : ''}</strong> — ${h.observation}</div>
+                <div class="timeline-context">${h.lesson}</div>
+              </div>
+              <span class="tag ${categoryClass(h.category)}">${h.category}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  // Generic fallback
+  const all = history.slice(0,6);
+  return `
+    <div class="answer-head">
+      <div class="ico">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </div>
+      <div class="answer-question">${q}</div>
+    </div>
+    <div class="answer-summary">Here are your most recent observations.</div>
+    <div class="answer-list">
+      ${all.map(h=>{
+        const s = students.find(st=>st.id===h.studentId);
+        return `
+          <div class="timeline-item">
+            <div class="timeline-date">${h.date}</div>
+            <div>
+              <div class="timeline-text"><strong>${s ? s.name : ''}</strong> — ${h.observation}</div>
+              <div class="timeline-context">${h.lesson}</div>
+            </div>
+            <span class="tag ${categoryClass(h.category)}">${h.category}</span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+document.getElementById('search-input').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') runSearch();
+});
+
+/* =========================================================
+   Export / document generation
+   ========================================================= */
+let exportKind = 'mentor';
+let exportPeriod = 'month';
+
+const teacherInfo = {
+  name: "Elin Lundberg",
+  email: "elin.lundberg@skolan.se",
+  subjects: "Mathematics & Swedish",
+  mentorClass: "7A"
+};
+
+function openExport(){
+  exportKind = 'mentor';
+  exportPeriod = 'month';
+  document.querySelectorAll('#export-tabs .export-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.kind === exportKind));
+  document.querySelectorAll('#period-pick .period-chip').forEach(c =>
+    c.classList.toggle('active', c.dataset.period === exportPeriod));
+  rebuildExport();
+  document.getElementById('export-modal').classList.add('show');
+}
+function closeExport(){
+  document.getElementById('export-modal').classList.remove('show');
+}
+
+document.querySelectorAll('#export-tabs .export-tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    exportKind = t.dataset.kind;
+    document.querySelectorAll('#export-tabs .export-tab').forEach(x=>
+      x.classList.toggle('active', x.dataset.kind === exportKind));
+    rebuildExport();
+  });
+});
+document.querySelectorAll('#period-pick .period-chip').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    exportPeriod = c.dataset.period;
+    document.querySelectorAll('#period-pick .period-chip').forEach(x=>
+      x.classList.toggle('active', x.dataset.period === exportPeriod));
+    rebuildExport();
+  });
+});
+
+function periodLabel(p){
+  return ({week:"this week", month:"this month", term:"this term", all:"all-time"})[p];
+}
+function periodFilter(items){
+  // Use dateRank as a proxy for recency (4=today, 3=this week, 2=earlier this month, 1=last month, 0=older)
+  if(exportPeriod === 'week') return items.filter(h => h.dateRank >= 3);
+  if(exportPeriod === 'month') return items.filter(h => h.dateRank >= 2);
+  if(exportPeriod === 'term') return items.filter(h => h.dateRank >= 1);
+  return items;
+}
+
+function rebuildExport(){
+  const student = students.find(s => s.id === activeStudentId);
+  const items = periodFilter(history.filter(h => h.studentId === student.id))
+    .sort((a,b) => b.dateRank - a.dateRank);
+
+  // Title + subtitle
+  const titles = {
+    mentor: "Email to mentor",
+    teacher: "Email to subject teacher",
+    conference: "Underlag inför utvecklingssamtal"
+  };
+  const subs = {
+    mentor: `Draft a heads-up note about ${student.name} to the class mentor`,
+    teacher: `Draft a quick note to a colleague teaching ${student.name}`,
+    conference: `Draft material to bring to the development conversation with ${student.name}'s family`
+  };
+  document.getElementById('export-title').textContent = titles[exportKind];
+  document.getElementById('export-sub').textContent = subs[exportKind];
+
+  // Meta fields
+  const meta = document.getElementById('export-meta');
+  if(exportKind === 'mentor'){
+    meta.innerHTML = `
+      <div><label>To</label><input value="mentor.7a@skolan.se" /></div>
+      <div><label>Subject</label><input value="Heads-up regarding ${student.name} (Class ${student.class})" /></div>
+    `;
+  } else if(exportKind === 'teacher'){
+    meta.innerHTML = `
+      <div><label>To</label><input value="kollega@skolan.se" /></div>
+      <div><label>Subject</label><input value="Quick note: ${student.name} — ${periodLabel(exportPeriod)}" /></div>
+    `;
+  } else {
+    meta.innerHTML = `
+      <div><label>Student</label><input value="${student.name} · Class ${student.class}" /></div>
+      <div><label>Date of conversation</label><input value="To be scheduled" /></div>
+    `;
+  }
+
+  // Body
+  const body =
+    exportKind === 'mentor'    ? generateMentorEmail(student, items)
+  : exportKind === 'teacher'   ? generateTeacherEmail(student, items)
+  :                              generateConferenceDoc(student, items);
+
+  document.getElementById('export-textarea').value = body;
+  document.getElementById('export-stats').textContent =
+    `${items.length} observation${items.length===1?'':'s'} · ${periodLabel(exportPeriod)}`;
+}
+
+function summarizeByCategory(items){
+  const by = {};
+  items.forEach(h => (by[h.category] = (by[h.category] || 0) + 1));
+  return by;
+}
+function bulletList(items){
+  return items.map(h => `  • ${h.date} — ${h.observation} (${h.lesson}) [${h.category}]`).join('\n');
+}
+
+function generateMentorEmail(student, items){
+  if(!items.length){
+    return `Hi,\n\nNo new notes about ${student.name} for ${periodLabel(exportPeriod)}.\n\nBest,\n${teacherInfo.name}`;
+  }
+  const counts = summarizeByCategory(items);
+  const followUp = items.filter(h => h.category === 'Needs follow-up' || h.category === 'Late arrival' || h.category === 'Missing material');
+  const positive = items.filter(h => h.category === 'Positive observation');
+
+  let summary = Object.entries(counts).map(([c,n]) => `${n} ${c.toLowerCase()}`).join(', ');
+
+  return (
+`Hi,
+
+A short heads-up regarding ${student.name} (Class ${student.class}) for ${periodLabel(exportPeriod)}.
+
+Summary: ${summary}.
+
+Recent observations:
+${bulletList(items.slice(0, 6))}
+
+${followUp.length ? `Worth keeping an eye on:
+${bulletList(followUp.slice(0, 4))}
+
+` : ''}${positive.length ? `On the positive side:
+${bulletList(positive.slice(0, 3))}
+
+` : ''}Let me know if you'd like to take this up at the next mentor meeting, or if you'd prefer a quick chat.
+
+Best,
+${teacherInfo.name}
+${teacherInfo.subjects}
+${teacherInfo.email}`);
+}
+
+function generateTeacherEmail(student, items){
+  if(!items.length){
+    return `Hi colleague,\n\nNo notes about ${student.name} for ${periodLabel(exportPeriod)} on my end.\n\nBest,\n${teacherInfo.name}`;
+  }
+  return (
+`Hi colleague,
+
+I wanted to share a quick picture of ${student.name} from my lessons (${teacherInfo.subjects.toLowerCase()}) for ${periodLabel(exportPeriod)}.
+
+What I've noticed:
+${bulletList(items.slice(0, 6))}
+
+Nothing urgent — just helpful context if you're seeing similar patterns in your own lessons. Happy to compare notes.
+
+Best,
+${teacherInfo.name}
+${teacherInfo.email}`);
+}
+
+function generateConferenceDoc(student, items){
+  const counts = summarizeByCategory(items);
+  const positive = items.filter(h => h.category === 'Positive observation');
+  const concerns = items.filter(h => ['Late arrival','Missing material','Classroom disruption','Needs follow-up'].includes(h.category));
+
+  const today = "May 7, 2026";
+  return (
+`UNDERLAG INFÖR UTVECKLINGSSAMTAL
+================================
+
+Student:        ${student.name}
+Class:          ${student.class}
+Mentor:         ${teacherInfo.name}
+Subjects:       ${teacherInfo.subjects}
+Period covered: ${periodLabel(exportPeriod).replace(/^./, c=>c.toUpperCase())}
+Prepared:       ${today}
+
+--------------------------------
+1. SAMMANFATTNING (Summary)
+--------------------------------
+${items.length} observations recorded for ${student.name} during this period.
+${Object.entries(counts).map(([c,n]) => `  • ${c}: ${n}`).join('\n') || '  • No observations recorded.'}
+
+--------------------------------
+2. STYRKOR (Strengths)
+--------------------------------
+${positive.length ? positive.map(h => `  • ${h.date} — ${h.observation} (${h.lesson})`).join('\n')
+                  : '  • No specific positive observations recorded for this period.'}
+
+--------------------------------
+3. UTVECKLINGSOMRÅDEN (Areas for development)
+--------------------------------
+${concerns.length ? concerns.map(h => `  • ${h.date} — ${h.observation} (${h.category})`).join('\n')
+                  : '  • No follow-up items recorded for this period.'}
+
+--------------------------------
+4. SAMTALSPUNKTER (Talking points)
+--------------------------------
+  • Acknowledge the positive observations above.
+${concerns.length ? `  • Discuss patterns around ${[...new Set(concerns.map(c=>c.category.toLowerCase()))].join(', ')}.\n  • Agree on next steps with the family.` : '  • Discuss continued progress and goals for the next period.'}
+  • Ask the student how they experience the class environment.
+  • Set 1–2 concrete goals for the next period.
+
+--------------------------------
+5. ÖVERENSKOMMELSER (Agreements)
+--------------------------------
+  • _______________________________________________
+  • _______________________________________________
+  • _______________________________________________
+
+Signed (mentor): ____________________
+Signed (parent/guardian): ____________________
+Signed (student): ____________________
+
+Generated by ClassFlow — review and edit before sharing.`);
+}
+
+function copyExport(){
+  const ta = document.getElementById('export-textarea');
+  ta.select();
+  document.execCommand('copy');
+  ta.setSelectionRange(0, 0);
+  showToast('Copied to clipboard', 'success');
+}
+function downloadExport(){
+  const student = students.find(s => s.id === activeStudentId);
+  const safeName = student.name.replace(/\s+/g, '_');
+  const kindLabel = ({mentor:"mentor_email", teacher:"teacher_email", conference:"utvecklingssamtal"})[exportKind];
+  const blob = new Blob([document.getElementById('export-textarea').value], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `ClassFlow_${safeName}_${kindLabel}.txt`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('Downloaded', 'success');
+}
+
+// Close modal on backdrop click
+document.getElementById('export-modal').addEventListener('click', e=>{
+  if(e.target.id === 'export-modal') closeExport();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape') closeExport();
+});
+
+/* =========================================================
+   AI FEATURE 1 — Voice capture (mock)
+   ========================================================= */
+let isRecording = false;
+const voiceSamples = [
+  "Kalle came 5 minutes late, Lisa forgot her material, Erik talked over the explanation, Sara helped her group with fractions",
+  "Amir asked thoughtful questions today, Maya finished early and helped Noah, Elin needs follow-up on missing assignment",
+  "Noah forgot textbook again, Sara presented confidently, Erik on track today",
+];
+function toggleVoice(){
+  const btn = document.getElementById('mic-btn');
+  const status = document.getElementById('recording-status');
+  const overlay = document.getElementById('voice-overlay');
+  if(!isRecording){
+    isRecording = true;
+    btn.classList.add('recording');
+    status.classList.add('show');
+    overlay.classList.add('show');
+    // Mock transcription after 2.4s
+    window._voiceT = setTimeout(()=>{
+      const sample = voiceSamples[Math.floor(Math.random()*voiceSamples.length)];
+      const ta = document.getElementById('observation');
+      ta.value = (ta.value ? ta.value + '\n' : '') + sample;
+      stopRecording();
+      ta.dispatchEvent(new Event('input'));
+      showToast('Voice note transcribed', 'success');
+    }, 2400);
+  } else {
+    clearTimeout(window._voiceT);
+    stopRecording();
+  }
+}
+function stopRecording(){
+  isRecording = false;
+  document.getElementById('mic-btn').classList.remove('recording');
+  document.getElementById('recording-status').classList.remove('show');
+  document.getElementById('voice-overlay').classList.remove('show');
+}
+
+/* =========================================================
+   AI FEATURE 1b — Shorthand expansion
+   ========================================================= */
+const shorthandMap = {
+  K: "Kalle Andersson", L: "Lisa Berg", E: "Erik Lind", S: "Sara Nilsson",
+  A: "Amir Hassan", El: "Elin Karlsson", N: "Noah Persson", M: "Maya Lindström",
+};
+const phraseMap = [
+  [/\bsen\s+(\d+)\s*m(in)?\b/gi, (m, n)=>`came ${n} minutes late`],
+  [/\bglömt\s+mtrl\b/gi, "forgot material"],
+  [/\bglömt\s+mat\b/gi, "forgot material"],
+  [/\bhjälpt\s+grupp\b/gi, "helped the group"],
+  [/\bstörd\b/gi, "disturbed the explanation"],
+  [/\bbra\b/gi, "did well today"],
+  [/\bok\b/gi, "on track today"],
+];
+function expandShorthand(text){
+  // Expand initials at start of segments separated by , ; or newline
+  let out = text.replace(/(^|[,;\n]\s*)([A-Z][a-z]?)\b\s/g, (full, sep, initial)=>{
+    return shorthandMap[initial] ? `${sep}${shorthandMap[initial]} — ` : full;
+  });
+  phraseMap.forEach(([re, repl])=>{ out = out.replace(re, repl); });
+  return out;
+}
+function detectShorthand(text){
+  // Returns true if text contains shorthand patterns
+  if(/(^|[,;\n]\s*)([A-Z][a-z]?)\b\s/.test(text)) return true;
+  return phraseMap.some(([re])=> re.test(text));
+}
+function applyShorthand(){
+  const ta = document.getElementById('observation');
+  ta.value = expandShorthand(ta.value);
+  ta.dispatchEvent(new Event('input'));
+  document.getElementById('shorthand-hint').classList.remove('show');
+  showToast('Shorthand expanded', 'success');
+}
+
+/* =========================================================
+   AI FEATURE 2 — Tone meter (live)
+   ========================================================= */
+function analyzeTone(text){
+  const segments = text.split(/[\n,;.]+/).map(s=>s.trim()).filter(Boolean);
+  let pos=0, neg=0, neu=0;
+  segments.forEach(s=>{
+    const c = detectCategory(s);
+    if(c === 'Positive observation') pos++;
+    else if(['Late arrival','Missing material','Classroom disruption','Needs follow-up'].includes(c)) neg++;
+    else neu++;
+  });
+  return {pos, neg, neu, total: segments.length};
+}
+function updateToneMeter(){
+  const text = document.getElementById('observation').value.trim();
+  const meter = document.getElementById('tone-meter');
+  if(!text || text.length < 10){
+    meter.style.display = 'none';
+    return;
+  }
+  meter.style.display = 'flex';
+  const t = analyzeTone(text);
+  const tot = Math.max(1, t.total);
+  document.querySelector('#tone-bar .pos').style.width = (t.pos/tot*100)+'%';
+  document.querySelector('#tone-bar .neu').style.width = (t.neu/tot*100)+'%';
+  document.querySelector('#tone-bar .neg').style.width = (t.neg/tot*100)+'%';
+  let summary;
+  if(t.neg > t.pos*2 && t.total >= 3) summary = `${t.neg} concerns · leans negative`;
+  else if(t.pos > t.neg) summary = `${t.pos} positive · balanced`;
+  else if(t.neg === 0) summary = `All positive`;
+  else summary = `${t.pos} positive · ${t.neg} concerns`;
+  document.getElementById('tone-summary').textContent = summary;
+}
+
+/* =========================================================
+   AI FEATURE 7 — Sensitivity detection
+   ========================================================= */
+const sensitiveWords = /\b(home|family|föräldrar|skilsm|divorce|health|hälsa|depression|ångest|anxious|crying|gråt|abuse|hem|mår dåligt|sad at home|not sleeping)\b/i;
+let lastSensitiveText = '';
+function checkSensitivity(){
+  const text = document.getElementById('observation').value;
+  const warn = document.getElementById('sensitivity-warn');
+  if(sensitiveWords.test(text)){
+    warn.classList.add('show');
+    lastSensitiveText = text;
+  } else {
+    warn.classList.remove('show');
+  }
+}
+let nextNoteRestricted = false;
+function markRestricted(){
+  nextNoteRestricted = true;
+  document.getElementById('sensitivity-warn').classList.remove('show');
+  showToast('Will be marked restricted on save', 'success');
+}
+
+/* =========================================================
+   Hook everything into the observation textarea
+   ========================================================= */
+const obsEl = document.getElementById('observation');
+obsEl.addEventListener('input', ()=>{
+  // Shorthand suggestion
+  const text = obsEl.value;
+  const hint = document.getElementById('shorthand-hint');
+  if(detectShorthand(text)){
+    document.getElementById('shorthand-text').textContent = 'Looks like shorthand — expand to full names and phrases?';
+    hint.classList.add('show');
+  } else {
+    hint.classList.remove('show');
+  }
+  updateToneMeter();
+  checkSensitivity();
+});
+
+/* =========================================================
+   AI FEATURE 4 — Duplicate detection in review
+   ========================================================= */
+function findDuplicates(){
+  const dupes = [];
+  pendingReview.forEach((row, i)=>{
+    const s = students.find(st => st.name === row.studentName);
+    if(!s) return;
+    const recent = history.find(h =>
+      h.studentId === s.id &&
+      h.dateRank >= 2 &&
+      similarity(h.observation, row.observation) > 0.55
+    );
+    if(recent) dupes.push({ idx: i, existing: recent });
+  });
+  return dupes;
+}
+function similarity(a, b){
+  const aw = new Set(a.toLowerCase().split(/\W+/).filter(w=>w.length>3));
+  const bw = new Set(b.toLowerCase().split(/\W+/).filter(w=>w.length>3));
+  if(aw.size === 0 || bw.size === 0) return 0;
+  let common = 0;
+  aw.forEach(w => { if(bw.has(w)) common++; });
+  return common / Math.max(aw.size, bw.size);
+}
+function renderDuplicateSummary(){
+  const dupes = findDuplicates();
+  const el = document.getElementById('duplicate-summary');
+  if(!dupes.length){ el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="review-banner" style="background:#fff7ec; border-color:#f0d6a4; color:#8a6210;">
+      <div class="ico" style="background:#fff; color:var(--warning);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+      </div>
+      <div>
+        <strong>${dupes.length} possible duplicate${dupes.length>1?'s':''}</strong> — similar notes already in this student's history.
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   AI FEATURE 3 — Coverage check
+   ========================================================= */
+function renderCoverage(){
+  // Count unique students with notes in current week (dateRank >= 3)
+  const noted = new Set(history.filter(h => h.dateRank >= 3).map(h => h.studentId));
+  const total = students.length;
+  const pct = Math.round(noted.size / total * 100);
+  document.getElementById('coverage-stat').innerHTML =
+    `${noted.size}<span class="of"> / ${total} students</span>`;
+  document.getElementById('coverage-bar-fill').style.width = pct + '%';
+  document.getElementById('coverage-sub').textContent =
+    `${pct}% of class noted this week. ${total - noted.size} students you haven't written about yet.`;
+  const quiet = students.filter(s => !noted.has(s.id));
+  document.getElementById('quiet-list').innerHTML =
+    quiet.slice(0, 6).map(s =>
+      `<div class="quiet-pill" onclick="focusQuiet(${s.id})">${s.name}</div>`
+    ).join('') || '<span style="color:var(--text-subtle);font-size:12px;">All students covered.</span>';
+}
+function focusQuiet(id){
+  activeStudentId = id;
+  navigate('history');
+}
+
+/* =========================================================
+   AI FEATURE 4 (proactive) — Pre-lesson briefing
+   ========================================================= */
+function renderBriefing(){
+  // Pick the "now" or next upcoming lesson today
+  const today = schedule.Monday;
+  const next = today.find(l => l.status === 'now' && l.type === 'lesson')
+            || today.find(l => l.status === 'upcoming' && l.type === 'lesson')
+            || today[0];
+
+  document.getElementById('briefing-title').textContent =
+    `${next.title} · ${next.status === 'now' ? 'starting soon' : 'next up'}`;
+
+  const points = buildBriefingPoints(next);
+  document.getElementById('briefing-points').innerHTML = points.map(p => `
+    <li>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>${p}</span>
+    </li>`).join('');
+}
+function buildBriefingPoints(lesson){
+  const recent = history.filter(h => h.dateRank >= 2 && h.lesson === lesson.title);
+  const followUps = recent.filter(h => ['Missing material','Late arrival','Needs follow-up'].includes(h.category));
+  const positives = recent.filter(h => h.category === 'Positive observation');
+  const noted = new Set(recent.map(h => h.studentId));
+  const quiet = students.filter(s => !noted.has(s.id)).slice(0, 1);
+
+  const out = [];
+  if(followUps.length){
+    const f = followUps[0];
+    const s = students.find(st => st.id === f.studentId);
+    out.push(`<strong>${s.name}</strong> — ${f.observation.toLowerCase()}. Consider a quick check-in at the start.`);
+  }
+  if(positives.length){
+    const p = positives[0];
+    const s = students.find(st => st.id === p.studentId);
+    out.push(`<strong>${s.name}</strong> — ${p.observation.toLowerCase()}. Worth acknowledging in class.`);
+  }
+  if(quiet.length){
+    out.push(`You haven't written about <strong>${quiet[0].name}</strong> recently — a chance to focus on them today.`);
+  }
+  if(out.length === 0){
+    out.push('No recent flags for this class. A clean slate to start the lesson.');
+  }
+  return out.slice(0, 3);
+}
+
+/* =========================================================
+   AI FEATURE 5 — Smarter search (semantic, comparative, time)
+   ========================================================= */
+const semanticGroups = {
+  quiet:    ['quiet','tystare','withdrawn','tired','trött','sad','nedstämd','alone','själv'],
+  active:   ['active','engaged','aktiv','helped','presented','answered','asked'],
+  late:     ['late','sen','tardy','försenad'],
+  material: ['forgot','missing','glömt','saknar','no book'],
+  disrupt:  ['disrupt','disturb','störd','interrupt','talked over'],
+};
+function semanticMatch(observation, group){
+  const t = observation.toLowerCase();
+  return semanticGroups[group].some(w => t.includes(w));
+}
+
+// Override runSearch with smarter parsing
+function runSearch(){
+  const q = document.getElementById('search-input').value.trim();
+  if(!q) return;
+  const card = document.getElementById('answer-card');
+  card.classList.add('show');
+  card.innerHTML = renderSmartAnswer(q);
+}
+function renderSmartAnswer(q){
+  const ql = q.toLowerCase();
+
+  // --- Comparative: "compare X and Y" / "jämför X och Y"
+  const cmp = ql.match(/(?:compare|jämför)\s+(\w+)\s+(?:and|och)\s+(\w+)/);
+  if(cmp){
+    const s1 = students.find(s => s.name.toLowerCase().includes(cmp[1]));
+    const s2 = students.find(s => s.name.toLowerCase().includes(cmp[2]));
+    if(s1 && s2) return renderCompare(q, s1, s2);
+  }
+
+  // --- Time: "last friday", "förra fredagen", "this week", "denna vecka"
+  const timeMatch = ql.match(/(last\s+\w+|förra\s+\w+|this\s+(week|month)|denna\s+(vecka|månad))/);
+  if(timeMatch){
+    return renderTimeAnswer(q, timeMatch[0]);
+  }
+
+  // --- Semantic: emotional/behavioral patterns
+  const semKey = Object.keys(semanticGroups).find(k => semanticGroups[k].some(w => ql.includes(w)));
+  if(semKey && !students.some(s => ql.includes(s.name.toLowerCase().split(' ')[0]))){
+    return renderSemantic(q, semKey);
+  }
+
+  // Fallback to original answer renderer
+  return renderAnswer(q);
+}
+function renderCompare(q, s1, s2){
+  const h1 = history.filter(h => h.studentId === s1.id);
+  const h2 = history.filter(h => h.studentId === s2.id);
+  const counts = (arr) => {
+    const c = {};
+    arr.forEach(h => c[h.category] = (c[h.category]||0)+1);
+    return c;
+  };
+  const c1 = counts(h1), c2 = counts(h2);
+  const cats = [...new Set([...Object.keys(c1), ...Object.keys(c2)])];
+  return `
+    <div class="answer-head">
+      <div class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg></div>
+      <div class="answer-question">${q}</div>
+    </div>
+    <div class="answer-summary">Side-by-side comparison of <strong>${s1.name}</strong> and <strong>${s2.name}</strong>.</div>
+    <div class="pattern-card">
+      <h4>Categories</h4>
+      <div class="pattern-row" style="font-weight:700;color:var(--text);"><span></span><span>${s1.name.split(' ')[0]} · ${s2.name.split(' ')[0]}</span></div>
+      ${cats.map(c => `
+        <div class="pattern-row">
+          <span><span class="tag ${categoryClass(c)}">${c}</span></span>
+          <span class="pattern-count">${c1[c]||0} · ${c2[c]||0}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+function renderTimeAnswer(q, label){
+  // Mock: filter to "this week" subset (dateRank >= 3)
+  const items = history.filter(h => h.dateRank >= 3).sort((a,b)=> b.dateRank - a.dateRank);
+  return `
+    <div class="answer-head">
+      <div class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div class="answer-question">${q}</div>
+    </div>
+    <div class="answer-summary">${items.length} note${items.length===1?'':'s'} from <strong>${label}</strong>.</div>
+    <div class="answer-list">
+      ${items.map(h => {
+        const s = students.find(st=>st.id===h.studentId);
+        return `<div class="timeline-item">
+          <div class="timeline-date">${h.date}</div>
+          <div>
+            <div class="timeline-text"><strong>${s?s.name:''}</strong> — ${h.observation}</div>
+            <div class="timeline-context">${h.lesson}</div>
+          </div>
+          <span class="tag ${categoryClass(h.category)}">${h.category}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+function renderSemantic(q, key){
+  const matches = history.filter(h => semanticMatch(h.observation, key));
+  const labelMap = {
+    quiet: "students whose notes suggest withdrawal or low energy",
+    active: "students with strongly engaged moments",
+    late: "late arrivals",
+    material: "missing-material situations",
+    disrupt: "classroom disruptions"
+  };
+  return `
+    <div class="answer-head">
+      <div class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.7.9 6.4 2.4"/><path d="M21 3v6h-6"/></svg></div>
+      <div class="answer-question">${q}</div>
+    </div>
+    <div class="answer-summary">Semantic match — ${matches.length} note${matches.length===1?'':'s'} resembling ${labelMap[key]}.</div>
+    <div class="answer-list">
+      ${matches.length ? matches.map(h => {
+        const s = students.find(st=>st.id===h.studentId);
+        return `<div class="timeline-item">
+          <div class="timeline-date">${h.date}</div>
+          <div>
+            <div class="timeline-text"><strong>${s?s.name:''}</strong> — ${h.observation}</div>
+            <div class="timeline-context">${h.lesson}</div>
+          </div>
+          <span class="tag ${categoryClass(h.category)}">${h.category}</span>
+        </div>`;
+      }).join('') : `<div class="empty">No matches — your notes don't show this pattern right now.</div>`}
+    </div>
+  `;
+}
+
+/* =========================================================
+   Add example questions for new search powers
+   ========================================================= */
+function addSearchExamples(){
+  const container = document.querySelector('.suggested-questions');
+  if(!container || container.querySelector('[data-extended]')) return;
+  const extras = [
+    'Compare Erik and Sara',
+    'Which students seem quiet this week?',
+    'What happened this week?',
+  ];
+  extras.forEach(q => {
+    const el = document.createElement('div');
+    el.className = 'suggested-q';
+    el.dataset.extended = '1';
+    el.textContent = q;
+    el.onclick = () => askExample(q);
+    container.appendChild(el);
+  });
+}
+
+/* =========================================================
+   AI FEATURE 6 — Translation (mock SE/EN)
+   ========================================================= */
+let displayLang = 'en';
+const translations = {
+  "Forgot material": "Glömde material",
+  "Came 5 minutes late": "Kom 5 minuter sent",
+  "Late arrival": "Sen ankomst",
+  "Missing material": "Saknar material",
+  "Classroom disruption": "Stör lektionen",
+  "Positive observation": "Positiv observation",
+  "Needs follow-up": "Behöver uppföljning",
+  "Participated actively in group work": "Deltog aktivt i grupparbete",
+  "Helped a classmate with fractions": "Hjälpte en klasskamrat med bråk",
+  "Talked over the explanation": "Pratade över förklaringen",
+  "Excellent presentation on geometry": "Utmärkt presentation om geometri",
+  "Needs follow-up on missing homework": "Behöver uppföljning på saknad läxa",
+  "Finished early and helped peers": "Blev klar tidigt och hjälpte andra",
+  "Forgot textbook again": "Glömde läroboken igen",
+  "Asked thoughtful questions": "Ställde genomtänkta frågor",
+};
+function setLang(l){
+  displayLang = l;
+  renderHistory();
+}
+function displayObservation(h){
+  if(displayLang === 'sv'){
+    return translations[h.observation] || h.observation;
+  }
+  return h.observation;
+}
+function categoryDisplay(c){
+  if(displayLang === 'sv') return translations[c] || c;
+  return c;
+}
+
+/* =========================================================
+   Follow-up pattern detection in history
+   ========================================================= */
+const dismissedFollowups = new Set();
+function detectRecurringPattern(items){
+  if(!items.length) return null;
+  const counts = {};
+  items.forEach(h => {
+    if(['Missing material','Late arrival','Needs follow-up'].includes(h.category)){
+      counts[h.category] = (counts[h.category]||0) + 1;
+    }
+  });
+  for(const [cat, count] of Object.entries(counts)){
+    if(count >= 2 && !dismissedFollowups.has(activeStudentId+':'+cat)){
+      return { cat, count };
+    }
+  }
+  return null;
+}
+function dismissFollowup(id){
+  // crude: dismiss all categories for active student
+  ['Missing material','Late arrival','Needs follow-up'].forEach(c =>
+    dismissedFollowups.add(activeStudentId+':'+c));
+  renderHistory();
+}
+
+/* =========================================================
+   Hook restricted flag into approveAndSave
+   (override the previous one to add restriction support)
+   ========================================================= */
+const originalApproveAndSave = approveAndSave;
+approveAndSave = function(){
+  const approved = pendingReview.filter(r=>r.approved && r.studentName !== '(unassigned)');
+  if(approved.length === 0){
+    showToast('Approve at least one row to save.');
+    return;
+  }
+  approved.forEach(r=>{
+    const s = students.find(st => st.name === r.studentName);
+    if(!s) return;
+    history.unshift({
+      studentId: s.id,
+      date: "Today",
+      dateRank: 4,
+      observation: r.observation,
+      lesson: r.lesson,
+      category: r.category,
+      restricted: nextNoteRestricted && sensitiveWords.test(r.observation),
+    });
+  });
+  showToast(`Saved ${approved.length} observation${approved.length>1?'s':''}`, 'success');
+  nextNoteRestricted = false;
+  pendingReview = [];
+  renderCoverage();
+  navigate('history');
+};
+
+/* =========================================================
+   Hook duplicate detection into renderReview
+   ========================================================= */
+const originalRenderReview = renderReview;
+renderReview = function(){
+  originalRenderReview();
+  renderDuplicateSummary();
+};
+
+/* =========================================================
+   Tone selector + new export tabs (substitute, reflection)
+   ========================================================= */
+let exportTone = 'warm';
+document.querySelectorAll('#tone-pick .tone-chip').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    exportTone = c.dataset.tone;
+    document.querySelectorAll('#tone-pick .tone-chip').forEach(x=>
+      x.classList.toggle('active', x.dataset.tone === exportTone));
+    rebuildExport();
+  });
+});
+
+// Add the new tab handlers (the listener loop already exists, but for new tabs)
+document.querySelectorAll('#export-tabs .export-tab').forEach(t=>{
+  t.removeEventListener && t.removeEventListener('click', null);
+  t.onclick = ()=>{
+    exportKind = t.dataset.kind;
+    document.querySelectorAll('#export-tabs .export-tab').forEach(x=>
+      x.classList.toggle('active', x.dataset.kind === exportKind));
+    // Tone selector is irrelevant for conference/reflection — hide
+    document.getElementById('tone-pick').style.display =
+      (exportKind === 'conference' || exportKind === 'reflection') ? 'none' : 'flex';
+    rebuildExport();
+  };
+});
+
+// Override rebuildExport to handle new kinds + tone + restricted notes
+const originalRebuildExport = rebuildExport;
+rebuildExport = function(){
+  const student = students.find(s => s.id === activeStudentId);
+  let allItems = periodFilter(history.filter(h => h.studentId === student.id));
+  // Filter restricted out from emails by default
+  const includesEmail = ['mentor','teacher','substitute'].includes(exportKind);
+  const restrictedCount = allItems.filter(h => h.restricted).length;
+  if(includesEmail) allItems = allItems.filter(h => !h.restricted);
+  const items = allItems.sort((a,b)=> b.dateRank - a.dateRank);
+
+  const titles = {
+    mentor: "Email to mentor",
+    teacher: "Email to subject teacher",
+    conference: "Underlag inför utvecklingssamtal",
+    substitute: "Substitute briefing",
+    reflection: "My reflection note"
+  };
+  const subs = {
+    mentor: `Draft a heads-up note about ${student.name} to the class mentor`,
+    teacher: `Draft a quick note to a colleague teaching ${student.name}`,
+    conference: `Draft material to bring to the development conversation`,
+    substitute: `Draft a briefing for the substitute teacher who will cover this class`,
+    reflection: `A private prompt to reflect on your work with ${student.name}`
+  };
+  document.getElementById('export-title').textContent = titles[exportKind];
+  document.getElementById('export-sub').textContent = subs[exportKind];
+
+  const meta = document.getElementById('export-meta');
+  if(exportKind === 'mentor'){
+    meta.innerHTML = `
+      <div><label>To</label><input value="mentor.7a@skolan.se" /></div>
+      <div><label>Subject</label><input value="Heads-up regarding ${student.name} (Class ${student.class})" /></div>`;
+  } else if(exportKind === 'teacher'){
+    meta.innerHTML = `
+      <div><label>To</label><input value="kollega@skolan.se" /></div>
+      <div><label>Subject</label><input value="Quick note: ${student.name} — ${periodLabel(exportPeriod)}" /></div>`;
+  } else if(exportKind === 'substitute'){
+    meta.innerHTML = `
+      <div><label>To</label><input value="vikarie@skolan.se" /></div>
+      <div><label>Subject</label><input value="Class 7A briefing — ${periodLabel(exportPeriod)}" /></div>`;
+  } else if(exportKind === 'conference'){
+    meta.innerHTML = `
+      <div><label>Student</label><input value="${student.name} · Class ${student.class}" /></div>
+      <div><label>Date of conversation</label><input value="To be scheduled" /></div>`;
+  } else {
+    meta.innerHTML = `
+      <div><label>Student</label><input value="${student.name}" /></div>
+      <div><label>Reflection date</label><input value="May 7, 2026" /></div>`;
+  }
+
+  // Restricted note indicator
+  const r = document.getElementById('restricted-note');
+  if(includesEmail && restrictedCount > 0){
+    r.style.display = 'block';
+    r.innerHTML = `
+      <div class="modal-helper" style="background:#f4ecfb; border-color:#dac8ee; color:#6c3fb5;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:1px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <div><strong>${restrictedCount} restricted note${restrictedCount>1?'s':''} excluded.</strong> Sensitive content is hidden from generated emails by default.</div>
+      </div>`;
+  } else {
+    r.style.display = 'none';
+  }
+
+  // Body
+  let body;
+  if(exportKind === 'mentor') body = generateMentorEmail(student, items);
+  else if(exportKind === 'teacher') body = generateTeacherEmail(student, items);
+  else if(exportKind === 'conference') body = generateConferenceDoc(student, items);
+  else if(exportKind === 'substitute') body = generateSubstituteBriefing(student, items);
+  else body = generateReflection(student, items);
+
+  // Apply tone (only to emails, not conference/reflection/substitute structured docs)
+  if(['mentor','teacher'].includes(exportKind)){
+    body = applyToneToEmail(body, exportTone);
+  }
+
+  document.getElementById('export-textarea').value = body;
+  document.getElementById('export-stats').textContent =
+    `${items.length} observation${items.length===1?'':'s'} · ${periodLabel(exportPeriod)} · tone: ${exportTone}`;
+};
+
+function applyToneToEmail(body, tone){
+  if(tone === 'short'){
+    // Keep only first paragraph and bullet list
+    const lines = body.split('\n');
+    const cut = lines.findIndex((l,i) => i > 6 && l.trim() === '');
+    return (cut > 0 ? lines.slice(0, cut+1).join('\n') + '\n\nBest,\n' + teacherInfo.name : body);
+  }
+  if(tone === 'formal'){
+    return body
+      .replace(/^Hi,/m, 'Dear colleague,')
+      .replace(/^Hi colleague,/m, 'Dear colleague,')
+      .replace(/Best,/g, 'Kind regards,')
+      .replace(/Let me know.*$/m, 'Please let me know if you wish to discuss this further.');
+  }
+  if(tone === 'detailed'){
+    return body.replace(
+      /Best,/,
+      `Additional context: these observations were captured directly during lessons using ClassFlow and reviewed before saving.\n\nBest,`
+    );
+  }
+  return body; // warm = default
+}
+
+function generateSubstituteBriefing(student, items){
+  // The substitute briefing is for the WHOLE CLASS, not just one student
+  const classNotes = history.filter(h => h.dateRank >= 2);
+  const counts = {};
+  classNotes.forEach(h => {
+    const s = students.find(st => st.id === h.studentId);
+    if(!s) return;
+    if(!counts[s.name]) counts[s.name] = [];
+    counts[s.name].push(h);
+  });
+  const flagged = Object.entries(counts)
+    .filter(([_, notes]) => notes.some(n => ['Missing material','Late arrival','Classroom disruption'].includes(n.category)))
+    .slice(0, 4);
+  const positive = Object.entries(counts)
+    .filter(([_, notes]) => notes.some(n => n.category === 'Positive observation'))
+    .slice(0, 3);
+
+  return (
+`SUBSTITUTE BRIEFING — Class ${student.class}
+================================
+
+Subject:   ${teacherInfo.subjects}
+Mentor:    ${teacherInfo.name}
+Date:      May 7, 2026
+Lesson:    Mathematics 7A · 08:30–09:40 · Room B203
+Students:  ${students.length}
+
+--------------------------------
+QUICK CONTEXT
+--------------------------------
+The class is currently working on fractions. Most students are confident; a few need extra support.
+
+--------------------------------
+STUDENTS WORTH KNOWING ABOUT
+--------------------------------
+${flagged.map(([name, notes]) => {
+  const reason = notes.find(n => ['Missing material','Late arrival','Classroom disruption'].includes(n.category));
+  return `  • ${name} — ${reason.observation.toLowerCase()} recently. A gentle reminder is fine.`;
+}).join('\n') || '  • No concerns to flag.'}
+
+--------------------------------
+POSITIVE TO ACKNOWLEDGE
+--------------------------------
+${positive.map(([name, notes]) => {
+  const p = notes.find(n => n.category === 'Positive observation');
+  return `  • ${name} — ${p.observation.toLowerCase()}.`;
+}).join('\n') || '  • —'}
+
+--------------------------------
+HOUSEKEEPING
+--------------------------------
+  • Lesson plan and materials are in the shared folder under "7A — May 7".
+  • Please leave a short note about how the lesson went.
+  • Restricted notes are not included in this briefing.
+
+Thank you,
+${teacherInfo.name}`);
+}
+
+function generateReflection(student, items){
+  const positive = items.filter(h => h.category === 'Positive observation').length;
+  const concerns = items.filter(h => ['Late arrival','Missing material','Classroom disruption','Needs follow-up'].includes(h.category)).length;
+  return (
+`REFLECTION — ${student.name}
+Period: ${periodLabel(exportPeriod)}
+Date:   May 7, 2026
+
+This is a private reflection prompt. ClassFlow doesn't share this anywhere.
+
+--------------------------------
+WHAT I'VE NOTICED
+--------------------------------
+Across ${items.length} note${items.length===1?'':'s'} this period:
+  • ${positive} positive moment${positive===1?'':'s'}
+  • ${concerns} concern${concerns===1?'':'s'} or follow-up${concerns===1?'':'s'}
+
+--------------------------------
+WHAT WENT WELL
+--------------------------------
+
+
+
+--------------------------------
+WHAT I MIGHT TRY DIFFERENTLY
+--------------------------------
+
+
+
+--------------------------------
+ONE SMALL THING TO DO NEXT WEEK
+--------------------------------
+
+
+
+(For your eyes only.)`);
+}
+
+/* =========================================================
+   Initial render
+   ========================================================= */
+renderSchedule();
+renderLesson();
+renderHistory();
+renderCoverage();
+renderBriefing();
+addSearchExamples();
+</script>
+</body>
+</html>
